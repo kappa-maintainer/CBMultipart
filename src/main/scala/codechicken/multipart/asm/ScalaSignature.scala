@@ -5,7 +5,7 @@ import java.util.{List => JList}
 import codechicken.multipart.asm.ScalaSignature._
 import org.objectweb.asm.tree.{AnnotationNode, ClassNode}
 
-import scala.jdk.CollectionConverters._
+import scala.collection.JavaConversions._
 
 object ScalaSignature {
 

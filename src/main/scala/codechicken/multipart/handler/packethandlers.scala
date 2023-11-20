@@ -20,7 +20,7 @@ import net.minecraft.util.text.{TextComponentString, TextComponentTranslation}
 import net.minecraft.world.World
 import net.minecraft.world.chunk.Chunk
 
-import scala.jdk.CollectionConverters._
+import scala.collection.JavaConversions._
 import scala.collection.mutable.{HashMap => MHashMap, Map => MMap, MultiMap => MMultiMap, Set => MSet}
 
 class MultipartPH {

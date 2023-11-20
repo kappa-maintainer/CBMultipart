@@ -9,7 +9,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.text.TextComponentString
 
-import scala.jdk.CollectionConverters._
+import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 
 trait TIInventoryTile extends TileMultipart with ISidedInventory {

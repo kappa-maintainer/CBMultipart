@@ -15,7 +15,7 @@ import net.minecraft.util.BlockRenderLayer
 import net.minecraft.util.math.RayTraceResult
 import org.lwjgl.opengl.GL11._
 
-import scala.jdk.CollectionConverters._
+import scala.collection.JavaConversions._
 
 object MicroblockRender {
     def renderHighlight(player: EntityPlayer, hit: RayTraceResult, mcrFactory: CommonMicroFactory, size: Int, material: Int) {
@@ -89,7 +89,7 @@ object MicroblockRender {
                 ccrs.setPipeline(f, 0, f.getVertices.length, opSet: _*)
                 ccrs.render()
                 buffer.finishDrawing()
-                list ++= buffer.bake().asScala
+                list ++= buffer.bake()
             }
         }
 

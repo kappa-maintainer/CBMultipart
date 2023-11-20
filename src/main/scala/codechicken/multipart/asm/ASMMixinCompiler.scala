@@ -19,7 +19,7 @@ import org.objectweb.asm.Type._
 import org.objectweb.asm.tree._
 import org.objectweb.asm.{ClassReader, MethodVisitor, Type}
 
-import scala.jdk.CollectionConverters._
+import scala.collection.JavaConversions._
 import scala.collection.mutable.{ListBuffer => MList, Map => MMap, Set => MSet}
 
 object DebugPrinter {
@@ -435,7 +435,7 @@ object ASMMixinCompiler {
         getClassInfo(stack.owner.getInternalName).superClass.flatMap(_.findPublicImpl(methodName, minsn.desc))
     }
 
-    def getAndRegisterParentTraits(cnode: ClassNode) = cnode.interfaces.asScala.map(getClassInfo).collect {
+    def getAndRegisterParentTraits(cnode: ClassNode) = cnode.interfaces.map(getClassInfo).collect {
         case i: ClassInfo.ScalaClassInfo if i.isTrait && !i.csym.isInterface =>
             registerScalaTrait(i.cnode)
     }
@@ -587,7 +587,7 @@ object ASMMixinCompiler {
             staticTransform(mv, mnode)
         }
 
-        cnode.methods.asScala.foreach(convertMethod)
+        cnode.methods.foreach(convertMethod)
 
         define(inode.name, createBytes(inode, 0))
         define(tnode.name, createBytes(tnode, 0))

@@ -8,7 +8,7 @@ import codechicken.lib.vec.uv.IconTransformation
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 
-import scala.jdk.CollectionConverters._
+import scala.collection.JavaConversions._
 
 /**
  * Trait for parts that are simply a cuboid, having one bounding box. Overrides TMultiPart functions to this effect.
@@ -21,9 +21,9 @@ trait TCuboidPart extends TMultiPart {
      */
     def getBounds: Cuboid6
 
-    override def getSubParts: Iterable[IndexedCuboid6] = Seq(new IndexedCuboid6(0, getBounds)).asJava
+    override def getSubParts: Iterable[IndexedCuboid6] = Seq(new IndexedCuboid6(0, getBounds))
 
-    override def getCollisionBoxes: Iterable[Cuboid6] = Seq(getBounds).asJava
+    override def getCollisionBoxes: Iterable[Cuboid6] = Seq(getBounds)
 
     override def renderBreaking(pos: Vector3, texture: TextureAtlasSprite, ccrs: CCRenderState) {
         ccrs.setPipeline(pos.translation(), new IconTransformation(texture))

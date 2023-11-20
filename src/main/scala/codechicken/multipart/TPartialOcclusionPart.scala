@@ -4,7 +4,7 @@ import java.lang.Iterable
 
 import codechicken.lib.vec.Cuboid6
 
-import scala.jdk.CollectionConverters._
+import scala.collection.JavaConversions._
 
 /**
  * This class provides a special type of occlusion model used by microblocks.

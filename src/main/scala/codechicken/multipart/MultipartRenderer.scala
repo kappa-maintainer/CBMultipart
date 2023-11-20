@@ -23,7 +23,7 @@ import net.minecraftforge.client.MinecraftForgeClient
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import org.lwjgl.opengl.GL11
 
-import scala.jdk.CollectionConverters._
+import scala.collection.JavaConversions._
 
 /**
  * Internal class for rendering callbacks. Should be moved to the handler package

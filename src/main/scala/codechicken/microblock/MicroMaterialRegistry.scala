@@ -14,7 +14,7 @@ import net.minecraft.util.BlockRenderLayer
 import net.minecraft.util.math.RayTraceResult
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 import scala.collection.mutable.{ListBuffer, HashMap => MHashMap}
 
 /**
@@ -175,7 +175,7 @@ object MicroMaterialRegistry {
 
     private[microblock] def calcMaxCuttingStrength() {
         val it = Item.REGISTRY.iterator
-        maxCuttingStrength = it.asScala.flatMap {
+        maxCuttingStrength = it.flatMap {
             case saw: Saw => Some(saw.getMaxCuttingStrength)
             case _ => None
         }.max

@@ -8,7 +8,7 @@ import net.minecraft.block.Block
 import net.minecraft.item.ItemStack
 import net.minecraftforge.fml.common.event.FMLInterModComms.IMCMessage
 
-import scala.jdk.CollectionConverters._
+import scala.collection.JavaConversions._
 import scala.collection.mutable.{Map => MMap}
 
 object ConfigContent {
@@ -100,7 +100,7 @@ object ConfigContent {
     }
 
     def load() {
-        for (block <- Block.REGISTRY.asInstanceOf[JIterable[Block]].asScala) {
+        for (block <- Block.REGISTRY.asInstanceOf[JIterable[Block]]) {
             val metas = Seq(block.getRegistryName.toString).flatMap(nameMap.remove).flatten
             metas.foreach { m =>
                 val state = block.getStateFromMeta(m)

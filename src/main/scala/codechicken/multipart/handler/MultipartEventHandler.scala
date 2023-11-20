@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.eventhandler.{EventPriority, SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-import scala.jdk.CollectionConverters._
+import scala.collection.JavaConversions._
 
 object MultipartEventHandler {
 
