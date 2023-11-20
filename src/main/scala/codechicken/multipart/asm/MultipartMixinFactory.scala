@@ -11,7 +11,7 @@ import org.objectweb.asm.Opcodes._
 import org.objectweb.asm.tree.{ClassNode, MethodNode}
 import org.objectweb.asm.{FieldVisitor, Label, MethodVisitor}
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 
 object MultipartMixinFactory extends ASMMixinFactory(classOf[TileMultipart]) {
     override protected def autoCompleteJavaTrait(cnode: ClassNode) {

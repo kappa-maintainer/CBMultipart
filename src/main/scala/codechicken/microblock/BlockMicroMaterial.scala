@@ -20,7 +20,7 @@ import net.minecraft.util.{BlockRenderLayer, EnumFacing}
 import net.minecraftforge.common.ForgeHooks
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 
 object MaterialRenderHelper {
     private val instances = new ThreadLocal[MaterialRenderHelper] {
@@ -79,11 +79,11 @@ class BlockMicroMaterial(val state: IBlockState, val materialID: String) extends
             if (model != null) {
                 val quads = new JLinkedList[BakedQuad]
                 quads.addAll(model.getQuads(state, side, 0))
-                quads.addAll(model.getQuads(state, null, 0).filter((quad: BakedQuad) => quad.getFace eq side))
+                quads.addAll(model.getQuads(state, null, 0).asScala.filter((quad: BakedQuad) => quad.getFace eq side).asJava)
                 if (quads.size > 0) {
                     val list = new JLinkedList[TextureAtlasSprite]
 
-                    for (quad <- quads) {
+                    for (quad <- quads.asScala) {
                         val sprite: TextureAtlasSprite = quad.getSprite
                         list.add(sprite)
                     }
@@ -167,8 +167,8 @@ object BlockMicroMaterial {
         val numOfProps = state.getProperties.size
         if (numOfProps > 0) {
             key += "["
-            import scala.collection.JavaConversions._
-            val properties = state.getProperties.iterator
+            import scala.jdk.CollectionConverters._
+            val properties = state.getProperties.asScala.iterator
             while (properties.hasNext) {
                 val (p, v) = properties.next()
                 key += p.getName + "=" + v.toString

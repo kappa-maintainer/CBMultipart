@@ -8,7 +8,7 @@ import codechicken.lib.vec._
 import codechicken.multipart._
 import net.minecraft.util.{BlockRenderLayer, ResourceLocation}
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 
 object EdgePlacement extends PlacementProperties {
 
@@ -190,7 +190,7 @@ trait PostMicroblock extends Microblock with TPartialOcclusionPart with TNormalO
 
     def getBounds = PostMicroFactory.aBounds(shape)
 
-    def getOcclusionBoxes = Seq(getBounds)
+    def getOcclusionBoxes = Seq(getBounds).asJava
 
     def getPartialOcclusionBoxes = getOcclusionBoxes
 

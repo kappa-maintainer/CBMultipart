@@ -5,7 +5,7 @@ import org.objectweb.asm.Type
 import org.objectweb.asm.Type._
 import org.objectweb.asm.tree._
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.{ListBuffer => MList, Map => MMap}
 
 object StackAnalyser {

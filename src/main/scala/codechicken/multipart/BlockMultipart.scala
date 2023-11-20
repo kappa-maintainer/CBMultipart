@@ -21,7 +21,7 @@ import net.minecraft.util.{BlockRenderLayer, EnumFacing, EnumHand}
 import net.minecraft.world.{Explosion, IBlockAccess, World}
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 
 /**
  * Internal RayTracing class that can save parts as part of their hit data

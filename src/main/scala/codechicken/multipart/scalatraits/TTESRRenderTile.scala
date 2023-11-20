@@ -6,7 +6,7 @@ import codechicken.lib.render.CCRenderState
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import codechicken.multipart._
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 
 
 trait TTESRRenderTile extends TileMultipartClient {

@@ -114,7 +114,7 @@ ext {
 
 dependencies {
 	compileOnly "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
-	pack "codechicken:ChickenASM:1.12-${config.cc_asm_version}"
+	compileOnly "codechicken:ChickenASM:1.12-${config.cc_asm_version}"
     compileOnly "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
 	minecraft ("com.cleanroommc:cleanroom:15.24.0.3007") {
 		exclude group: 'org.scala-lang'

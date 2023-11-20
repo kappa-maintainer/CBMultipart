@@ -4,7 +4,7 @@ import java.lang.Iterable
 
 import codechicken.lib.vec.Cuboid6
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 
 /**
  * This suite of 3 classes provides simple functions for standard bounding box based occlusion testing.

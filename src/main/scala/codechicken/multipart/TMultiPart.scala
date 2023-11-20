@@ -18,7 +18,7 @@ import net.minecraft.util.math.{BlockPos, Vec3d}
 import net.minecraft.util.{BlockRenderLayer, EnumHand, ResourceLocation}
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 
 abstract class TMultiPart {
     /**

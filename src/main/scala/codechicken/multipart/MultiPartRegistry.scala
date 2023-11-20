@@ -3,7 +3,6 @@ package codechicken.multipart
 import java.lang.Iterable
 import java.util
 import java.util.{Map => JMap}
-
 import codechicken.lib.data.{MCDataInput, MCDataOutput}
 import codechicken.lib.packet.PacketCustom
 import codechicken.multipart.api.{IDynamicPartFactory, IPartConverter, IPartFactory, IPlacementConverter}
@@ -19,8 +18,8 @@ import net.minecraft.world.World
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
+import scala.collection.JavaConverters.{iterableAsScalaIterableConverter, _}
 import scala.collection.mutable.{ListBuffer, Map => MMap}
 
 /**
@@ -53,7 +52,7 @@ object MultiPartRegistry {
     }
 
     def registerParts(partFactory: IPartFactory, types: Iterable[ResourceLocation]) {
-        registerParts(partFactory.createPart _, types.asScala)
+        registerParts(partFactory.createPart _, types)
     }
 
     /**
@@ -68,7 +67,7 @@ object MultiPartRegistry {
     }
 
     def registerParts(partFactory: (ResourceLocation, Boolean) => TMultiPart, types: Iterable[ResourceLocation]) {
-        registerParts(partFactory, types.asScala)
+        registerParts(partFactory, types)
     }
 
     /**
@@ -95,7 +94,7 @@ object MultiPartRegistry {
     }
 
     def registerParts(partFactory: IDynamicPartFactory, types: Iterable[ResourceLocation]) {
-        registerParts(partFactory, types.asScala)
+        registerParts(partFactory, types)
     }
 
     /**

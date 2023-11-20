@@ -5,7 +5,7 @@ import java.util.{LinkedList => JLinkedList}
 import codechicken.multipart.{TMultiPart, TileMultipart}
 import net.minecraft.util.ITickable
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 
 /**
  * Mixin Trait for parts implementing ITickable. Allows parts

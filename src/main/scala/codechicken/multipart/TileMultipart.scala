@@ -26,7 +26,7 @@ import net.minecraft.util.{BlockRenderLayer, EnumFacing, EnumHand, ResourceLocat
 import net.minecraft.world.{EnumSkyBlock, World}
 import net.minecraftforge.common.capabilities.{Capability, ICapabilityProvider}
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.ListBuffer
 
 class TileMultipart extends TileEntity with IChunkLoadTile {
@@ -38,7 +38,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
     /**
      * Implicit java conversion of part list
      */
-    def jPartList: JList[TMultiPart] = partList
+    def jPartList: JList[TMultiPart] = partList.asJava
 
     private[multipart] def from(that: TileMultipart) {
         copyFrom(that)
@@ -331,7 +331,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
     def addCollisionBoxToList(entityBox: AxisAlignedBB, list: JList[AxisAlignedBB]) {
         val mask = new Cuboid6(entityBox).subtract(pos) //get entityBox in zero-space
         partList.foreach {
-            _.getCollisionBoxes.foreach { c =>
+            _.getCollisionBoxes.asScala.foreach { c =>
                 if (c.intersects(mask)) list.add(c.aabb().offset(pos))
             }
         }
@@ -340,7 +340,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
     /**
      * Perform a raytrace returning the nearest intersecting part
      */
-    def collisionRayTrace(start: Vec3d, end: Vec3d): PartRayTraceResult = rayTraceAll(start, end).headOption.orNull
+    def collisionRayTrace(start: Vec3d, end: Vec3d): PartRayTraceResult = rayTraceAll(start, end).asScala.headOption.orNull
 
     /**
      * Perform a raytrace returning all intersecting parts sorted nearest to farthest
@@ -356,7 +356,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
             }
 
         list.asInstanceOf[ListBuffer[DistanceRayTraceResult]].sorted.asInstanceOf[ListBuffer[PartRayTraceResult]]
-    }
+    }.asJava
 
     /**
      * Drop and remove part at index (internal mining callback)
@@ -369,7 +369,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
 
     def getDrops: JArrayList[ItemStack] = {
         val list = new JArrayList[ItemStack]()
-        partList.foreach { _.getDrops.foreach { list.add } }
+        partList.foreach { _.getDrops.asScala.foreach { list.add } }
         list
     }
 
@@ -499,7 +499,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
      * Notifies all parts not in the passed collection of a change from all the parts in the collection
      */
     def multiPartChange(parts: JCollection[TMultiPart]) {
-        operate(p => if (!parts.contains(p)) parts.foreach(p.onPartChanged))
+        operate(p => if (!parts.contains(p)) parts.asScala.foreach(p.onPartChanged))
     }
 
     /**
@@ -537,7 +537,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
      */
     def dropItems(items: JIterable[ItemStack]) {
         val pos = Vector3.fromTileCenter(this)
-        items.foreach(item => TileMultipart.dropItem(item, world, pos))
+        items.asScala.foreach(item => TileMultipart.dropItem(item, world, pos))
     }
 
     override def shouldRefresh(world: World, pos: BlockPos, oldState: IBlockState, newState: IBlockState) = oldState.getBlock != newState.getBlock
@@ -559,12 +559,12 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
         }
         calculatedCaps += cap
         val holder = new CapHolder[Any]
-        val genericValid = capParts.filter(_.hasCapability(cap, null))
+        val genericValid = capParts.asScala.filter(_.hasCapability(cap, null))
         if (genericValid.nonEmpty) {
             holder.generic = MultipartCapRegistry.merge(cap, genericValid.map(_.getCapability(cap, null).asInstanceOf[Object]))
         }
         for (side <- EnumFacing.VALUES) {
-            val sidedValid = capParts.filter(_.hasCapability(cap, side))
+            val sidedValid = capParts.asScala.filter(_.hasCapability(cap, side))
             if (sidedValid.nonEmpty) {
                 holder.sided += side -> MultipartCapRegistry.merge(cap, sidedValid.map(_.getCapability(cap, side).asInstanceOf[Object]))
             }
@@ -662,11 +662,11 @@ object TileMultipart {
         }
 
         val p = MultiPartRegistry.convertBlock(world, pos, world.getBlockState(pos))
-        if (p.nonEmpty) {
-            val t = MultipartGenerator.generateCompositeTile(null, p, world.isRemote)
+        if (p.asScala.nonEmpty) {
+            val t = MultipartGenerator.generateCompositeTile(null, p.asScala, world.isRemote)
             t.setPos(pos)
             t.setWorld(world)
-            p.foreach(t.addPart_do)
+            p.asScala.foreach(t.addPart_do)
             return (t, true)
         }
         (null, false)
@@ -682,7 +682,7 @@ object TileMultipart {
         }
 
     def checkNoEntityCollision(world: World, pos: BlockPos, part: TMultiPart) =
-        part.getCollisionBoxes.forall(b => world.checkNoEntityCollision(b.aabb.offset(pos)))
+        part.getCollisionBoxes.asScala.forall(b => world.checkNoEntityCollision(b.aabb.offset(pos)))
 
     /**
      * Returns whether part can be added to the space at pos. Will do conversions as necessary.

@@ -14,7 +14,7 @@ import net.minecraft.util.BlockRenderLayer
 import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.ListBuffer
 
 abstract class Microblock(var material: Int = 0) extends TMultiPart with TCuboidPart {
@@ -160,7 +160,7 @@ trait CommonMicroblock extends Microblock with TPartialOcclusionPart with TMicro
 
     def getSlotMask = 1 << getSlot
 
-    def getPartialOcclusionBoxes = Seq(getBounds)
+    def getPartialOcclusionBoxes = Seq(getBounds).asJava
 
     override def itemFactoryID = microFactory.getFactoryID
 }
