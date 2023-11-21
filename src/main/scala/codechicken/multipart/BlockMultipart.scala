@@ -202,7 +202,7 @@ class BlockMultipart extends Block(Material.ROCK) {
         }
     }
 
-    override def onEntityCollidedWithBlock(world: World, pos: BlockPos, state: IBlockState, entity: Entity) {
+    override def onEntityCollision(world: World, pos: BlockPos, state: IBlockState, entity: Entity) {
         getTile(world, pos) match {
             case null =>
             case tile => tile.onEntityCollision(entity)

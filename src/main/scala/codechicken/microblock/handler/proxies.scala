@@ -48,7 +48,7 @@ class MicroblockProxy_serverImpl {
         sawStone = createSaw(config, "saw_stone", 1)
         sawIron = createSaw(config, "saw_iron", 2)
         sawDiamond = createSaw(config, "saw_diamond", 3)
-        stoneRod = new Item().setUnlocalizedName("microblockcbe:stone_rod").setCreativeTab(CreativeTabs.MATERIALS)
+        stoneRod = new Item().setTranslationKey("microblockcbe:stone_rod").setCreativeTab(CreativeTabs.MATERIALS)
         ForgeRegistries.ITEMS.register(stoneRod.setRegistryName("stone_rod"))
 
         OreDictionary.registerOre("rodStone", stoneRod)
@@ -63,7 +63,7 @@ class MicroblockProxy_serverImpl {
 
     def createSaw(config: ConfigFile, name: String, strength: Int) = {
         val saw = new ItemSaw(config.getTag(name).useBraces(), strength)
-            .setUnlocalizedName("microblockcbe:" + name)
+            .setTranslationKey("microblockcbe:" + name)
         ForgeRegistries.ITEMS.register(saw.setRegistryName(name))
         saws += saw
         saw
@@ -111,7 +111,7 @@ class MicroblockProxy_clientImpl extends MicroblockProxy_serverImpl {
     @SideOnly(Side.CLIENT)
     def registerFMPItemModel(item: Item) {
         val loc = item.getRegistryName
-        val mLoc = new ModelResourceLocation("microblockcbe:items", s"type=${loc.getResourcePath}")
+        val mLoc = new ModelResourceLocation("microblockcbe:items", s"type=${loc.getPath}")
         ModelLoader.setCustomModelResourceLocation(item, 0, mLoc)
         ModelLoader.setCustomMeshDefinition(item, new ItemMeshDefinition {
             override def getModelLocation(stack: ItemStack) = mLoc

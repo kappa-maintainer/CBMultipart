@@ -114,12 +114,12 @@ ext {
 
 dependencies {
 	compileOnly "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
-	pack "codechicken:ChickenASM:1.12-${config.cc_asm_version}"
+	compileOnly "codechicken:ChickenASM:1.12-${config.cc_asm_version}"
     compileOnly "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
 	minecraft ("com.cleanroommc:cleanroom:15.24.0.3007") {
 		exclude group: 'org.scala-lang'
 	}
-	implementation 'org.scala-lang:scala-library:2.13.12'
+	implementation 'org.scala-lang:scala-library:2.12.18'
 	lwjglLibraries[0].each {
 		lwjglLibraries[1].each { arch ->
 			runtimeOnly "org.lwjgl3:$it:3.3.2-22-CLEANROOM:$lwjglArch"

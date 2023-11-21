@@ -105,7 +105,7 @@ object MultipartGenerator extends ScratchBitSet {
      * Adds a tile entity to the world without notifying neighbor blocks or adding it to the tick list
      */
     def silentAddTile(world: World, pos: BlockPos, tile: TileEntity) {
-        val chunk = world.getChunkFromBlockCoords(pos)
+        val chunk = world.getChunk(pos)
         if (chunk != null) {
             chunk.addTileEntity(pos, tile)
         }
