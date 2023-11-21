@@ -272,10 +272,10 @@ class StackAnalyser(val owner: Type, val m: MethodNode) {
                     push(Invoke(ainsn.getOpcode, popArgs(minsn.desc), null, minsn))
             }
             case tinsn: TypeInsnNode => ainsn.getOpcode match {
-                case NEW => push(New(getType(tinsn.desc)))
-                case NEWARRAY => push(NewArray(pop(), getType(tinsn.desc)))
+                case NEW => push(New(getType("L"+tinsn.desc+";")))
+                case NEWARRAY => push(NewArray(pop(), getType("L"+tinsn.desc+";")))
                 case ANEWARRAY => push(NewArray(pop(), getType("[" + tinsn.desc)))
-                case CHECKCAST => push(Cast(pop(), getType(tinsn.desc)))
+                case CHECKCAST => push(Cast(pop(), getType("L"+tinsn.desc+";")))
                 case INSTANCEOF => push(UnaryOp(INSTANCEOF, pop()))
             }
             case mainsn: MultiANewArrayInsnNode =>

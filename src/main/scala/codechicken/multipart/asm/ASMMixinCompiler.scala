@@ -427,7 +427,7 @@ object ASMMixinCompiler {
             return None
         }
 
-        stack.peek(Type.getType(minsn.desc).getArgumentTypes.length) match {
+        stack.peek(Type.getArgumentCount( minsn.desc)) match {
             case Load(This(o)) =>
             case _ => return None //have to be invoked on this
         }
@@ -499,7 +499,7 @@ object ASMMixinCompiler {
         }
 
         def staticTransform(mnode: MethodNode, base: MethodNode) {
-            val stack = new StackAnalyser(getType(cnode.name), base)
+            val stack = new StackAnalyser(getType("L"+cnode.name+";"), base)
             val insnList = mnode.instructions
             var insn = insnList.getFirst
 
