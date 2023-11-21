@@ -19,7 +19,7 @@
 # Include git important files
 !.gitmodules
 !.gitignore
-
+!.github
 # Include Important Folders
 !src/
 !libs/
