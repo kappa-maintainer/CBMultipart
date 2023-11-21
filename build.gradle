@@ -114,7 +114,8 @@ ext {
 
 dependencies {
 	compileOnly "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
-	compileOnly "codechicken:ChickenASM:1.12-${config.cc_asm_version}"
+	compileOnly "codechicken:ChickenASM:1.12-1.0.2.9"
+	//jarJar "codechicken:ChickenASM:[1.12-1.0.2.9,2.0.0.10)"
     compileOnly "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
 	minecraft ("com.cleanroommc:cleanroom:15.24.0.3007") {
 		exclude group: 'org.scala-lang'
@@ -134,6 +135,7 @@ println config.mc_version + "-" + config.forge_version
 // Setup the forge minecraft plugin data. Specify the preferred forge/minecraft version here
 
 processResources {
+	duplicatesStrategy=DuplicatesStrategy.EXCLUDE
 	//redo task if any of these properties change
 	inputs.property "version", project.version
 	inputs.property "mc_version", config.mc_version
@@ -158,21 +160,6 @@ jar {
 	from configurations.pack
 }
 
-task srcJar(type: Jar) {
-	from sourceSets.main.allSource
-}
 
-task deobfJar(type: Jar) {
-	manifest commonManifest
-	from sourceSets.main.output
-	from configurations.pack
-}
-
-
-
-// Tell the artifact system about our extra jars
-artifacts {
-	archives srcJar, deobfJar
-}
 
 
