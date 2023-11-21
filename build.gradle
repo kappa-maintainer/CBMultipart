@@ -18,8 +18,6 @@ apply plugin: 'net.minecraftforge.gradle'
 group = "codechicken"
 archivesBaseName = "ForgeMultipart"
 
-targetCompatibility = "17"
-sourceCompatibility = "17"
 
 // Define properties file
 ext.configFile = file "build.properties"
