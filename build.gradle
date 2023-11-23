@@ -115,10 +115,7 @@ dependencies {
 	implementation "codechicken:ChickenASM:1.12-1.0.2.9"
 	//jarJar "codechicken:ChickenASM:[1.12-1.0.2.9,2.0.0.10)"
     compileOnly "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
-	minecraft ("com.cleanroommc:cleanroom:15.24.0.3007") {
-		exclude group: 'org.scala-lang'
-	}
-	implementation 'org.scala-lang:scala-library:2.12.18'
+	minecraft ("com.cleanroommc:cleanroom:15.24.0.3009") 
 	lwjglLibraries[0].each {
 		lwjglLibraries[1].each { arch ->
 			runtimeOnly "org.lwjgl3:$it:3.3.2-22-CLEANROOM:$lwjglArch"
