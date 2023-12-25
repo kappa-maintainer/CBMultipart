@@ -427,7 +427,7 @@ object ASMMixinCompiler {
             return None
         }
 
-        stack.peek(Type.getArgumentCount( minsn.desc)) match {
+        stack.peek(Type.getType(minsn.desc).getArgumentTypes.length) match {
             case Load(This(o)) =>
             case _ => return None //have to be invoked on this
         }
