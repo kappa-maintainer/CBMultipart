@@ -31,6 +31,8 @@ jobs:
       name: Set up Gradle
     - name: Add permission
       run: chmod +x ./gradlew
+    - name: Setup
+      run: ./gradlew setupDecompWorkspace
     - name: Execute Gradle build
       run: ./gradlew build
         
