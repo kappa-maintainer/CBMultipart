@@ -1,176 +1,252 @@
-buildscript {
-	repositories {
-		jcenter()
-		maven {
-			name = "forge"
-			url = "http://files.minecraftforge.net/maven"
-		}
-	}
-	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-	}
+plugins {
+    id 'java'
+    id 'scala'
+    id 'java-library'
+    id 'maven-publish'
+    id 'com.gradleup.shadow' version '9.3.2'
+    id 'org.jetbrains.gradle.plugin.idea-ext' version '1.4.1'
+    id 'xyz.wagyourtail.unimined' version '1.4.10-kappa'
+    id 'net.kyori.blossom' version '2.2.0'
 }
 
-apply plugin: 'scala'
-apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: 'maven'
+import org.jetbrains.gradle.ext.Gradle
 
-group = "codechicken"
-archivesBaseName = "ForgeMultipart"
+apply from: 'gradle/scripts/helpers.gradle'
 
-targetCompatibility = "1.8"
-sourceCompatibility = "1.8"
+// Early Assertions
+assertProperty 'mod_version'
+assertProperty 'root_package'
+assertProperty 'mod_name'
 
-// Define properties file
-ext.configFile = file "build.properties"
+assertSubProperties 'use_access_transformer', 'access_transformer_locations'
+assertSubProperties 'is_coremod', 'coremod_includes_mod', 'coremod_plugin_class_name'
+assertSubProperties 'use_asset_mover', 'asset_mover_version'
 
-configFile.withReader {
-	// Load config.  It shall from now be referenced as simply config or project.config
-	def prop = new Properties()
-	prop.load(it)
-	project.ext.config = new ConfigSlurper().parse prop
+setDefaultProperty 'generate_sources_jar', true, false
+setDefaultProperty 'generate_javadocs_jar', true, false
+setDefaultProperty 'minecraft_username', true, 'Developer'
+setDefaultProperty 'extra_jvm_args', false, ''
+
+version = propertyString('mod_version')
+group = propertyString('root_package')
+
+base {
+    archivesName = propertyString('mod_name') as String
+}
+
+scala {
+    scalaVersion = '2.12.21'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+    if (propertyBool('generate_sources_jar')) {
+        withSourcesJar()
+    }
+    if (propertyBool('generate_javadocs_jar')) {
+        withJavadocJar()
+    }
 }
 
 configurations {
-	pack
-	compile {
-		extendsFrom pack
-	}
+    contain
+    implementation.extendsFrom(contain)
+    modCompileOnly
+    compileOnly.extendsFrom(modCompileOnly)
+    modRuntimeOnly
+    runtimeOnly.extendsFrom(modRuntimeOnly)
 }
 
-repositories {
-	maven {
-		name = "chickenbones"
-		url = "http://chickenbones.net/maven"
-	}
-	maven {
-		name = "JEI Maven."
-		url = "http://dvs1.progwml6.com/files/maven"
-	}
+String remapTaskName = propertyBool('enable_shadow') ? "remapShadowJar" : "remapJar"
+
+unimined.minecraft {
+    version "1.12.2"
+
+    mappings {
+        mcp("stable", "39-1.12")
+    }
+
+    cleanroom {
+        if (propertyBool('use_access_transformer')) {
+            accessTransformer "${rootProject.projectDir}/src/main/resources/${propertyString('access_transformer_locations')}"
+        }
+        loader "0.4.4-alpha"
+        runs.auth.username = minecraft_username
+        runs.all {
+            def extraArgs = propertyString('extra_jvm_args')
+            if (extraArgs != null && !extraArgs.trim().isEmpty()) {
+                jvmArgs += extraArgs.split { "\\s+" }.toList()
+            }
+            if (propertyBool('enable_foundation_debug')) {
+                systemProperty("foundation.dump", "true")
+                systemProperty("foundation.verbose", "true")
+            }
+            if (propertyBool('is_coremod')) {
+                systemProperty("fml.coreMods.load", propertyString('coremod_plugin_class_name'))
+            }
+            return
+        }
+    }
+
+    defaultRemapJar = false
+    
+    String jarTaskName = propertyBool('enable_shadow') ? "shadowJar" : "jar"
+    
+    remap(tasks.named(jarTaskName).get()) {
+        mixinRemap {
+            enableBaseMixin()
+            enableMixinExtra()
+            disableRefmap()
+        }
+    }
+
+    mods {
+        remap(configurations.modCompileOnly)
+        remap(configurations.modRuntimeOnly)
+    }
 }
 
 dependencies {
-	compile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
-	pack "codechicken:ChickenASM:1.12-${config.cc_asm_version}"
-    compile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
+    if (propertyBool('use_asset_mover')) {
+        implementation "com.cleanroommc:assetmover:${propertyString('asset_mover_version')}"
+    }
+    if (propertyBool('enable_junit_testing')) {
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
 }
 
-version = "${project.config.mod_version}." + System.getenv("BUILD_NUMBER") ?: "1"
-
-println config.mc_version + "-" + config.forge_version
-// Setup the forge minecraft plugin data. Specify the preferred forge/minecraft version here
-minecraft {
-	version = config.mc_version + "-" + config.forge_version
-	mappings = config.mappings
-	runDir = "run"
-	makeObfSourceJar = false
-}
+apply from: 'gradle/scripts/dependencies.gradle'
 
 processResources {
-	//redo task if any of these properties change
-	inputs.property "version", project.version
-	inputs.property "mc_version", config.mc_version
-	inputs.property "ccl_version", config.ccl_version
-
-	// Replace properties in info files
-	from(sourceSets.main.resources.srcDirs) {
-		include '*.info'
-		expand 'version': project.version, 'mc_version': config.mc_version, 'ccl_version': config.ccl_version
-	}
     rename '(.+_at.cfg)', 'META-INF/$1'
 }
 
-version = "${project.minecraft.version}-${project.version}"
+sourceSets {
+    main {
+        blossom {
+            scalaSources {
+                property('mod_version', propertyString('mod_version'))
+            }
+            resources {
+                property('mod_version', propertyString('mod_version'))
+            }
+        }
+    }
+}
 
-def commonManifest = {
-	attributes 'ContainedDeps': "ChickenASM-1.12-${config.cc_asm_version}.jar"
-    attributes 'FMLAT': 'fmp_at.cfg'
+idea {
+    module {
+        inheritOutputDirs = true
+    }
+    project {
+        settings {
+            runConfigurations {
+                '1. Build'(Gradle) {
+                    taskNames = ["build"]
+                }
+                '2. Run Client'(Gradle) {
+                    taskNames = ["runClient"]
+                }
+                '3. Run Server'(Gradle) {
+                    taskNames = ["runServer"]
+                }
+            }
+            compiler.javac {
+                afterEvaluate {
+                    javacAdditionalOptions = '-encoding utf8'
+                    moduleJavacAdditionalOptions = [
+                            (project.name + '.main'): tasks.compileJava.options.compilerArgs.collect { '"' + it + '"' }.join(' ')
+                    ]
+                }
+            }
+        }
+    }
+}
+
+if (!propertyBool('enable_shadow')) {
+    shadowJar.enabled = false
+}
+
+compileJava {
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_21
 }
 
 jar {
-	classifier = 'universal'
-	manifest commonManifest
-	from configurations.pack
+    archiveClassifier = 'deobf'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    if (configurations.contain.size() > 0) {
+        into('/') {
+            from configurations.contain
+        }
+    }
+    doFirst {
+        manifest {
+            def attribute_map = [:]
+            attribute_map['ModType'] = "CRL"
+            if (configurations.contain.size() > 0) {
+                attribute_map['ContainedDeps'] = configurations.contain.collect { it.name }.join(' ')
+                attribute_map['NonModDeps'] = true
+            }
+            if (propertyBool('is_coremod')) {
+                attribute_map['FMLCorePlugin'] = propertyString('coremod_plugin_class_name')
+                if (propertyBool('coremod_includes_mod')) {
+                    attribute_map['FMLCorePluginContainsFMLMod'] = true
+                }
+            }
+            if (propertyBool('use_access_transformer')) {
+                attribute_map['FMLAT'] = propertyString('access_transformer_locations')
+            }
+            attributes(attribute_map)
+        }
+    }
+    finalizedBy(tasks.named(remapTaskName).get())
 }
 
-task srcJar(type: Jar) {
-	from sourceSets.main.allSource
-	classifier = 'sources'
-}
 
-task deobfJar(type: Jar) {
-	classifier = 'deobf'
-	manifest commonManifest
-	from sourceSets.main.output
-	from configurations.pack
+shadowJar {
+    configurations = [project.configurations.shadow]
+    archiveClassifier = "shadow"
 }
 
 
-task signJar(type: SignJar, dependsOn: reobfJar) {
-	onlyIf { // Skip the task if our secret data isn't available
-		project.hasProperty('keyStore')
-	}
-
-	if (project.hasProperty('keyStore')) {
-		keyStore = project.keyStore // This needs to be a path to the keystore file
-		alias = project.keyStoreAlias
-		storePass = project.keyStorePass
-		keyPass = project.keyStoreKeyPass
-		inputFile = jar.archivePath
-		outputFile = jar.archivePath
-	}
+tasks.named(remapTaskName).configure {
+    archiveClassifier = 'universal'
+    doFirst {
+        logging.captureStandardOutput LogLevel.INFO
+    }
+    doLast {
+        logging.captureStandardOutput LogLevel.QUIET
+    }
 }
 
-build.dependsOn signJar
-
-tasks.withType(ScalaCompile) { scalaCompileOptions.additionalParameters = ["-Xexperimental"] }
-
-// Tell the artifact system about our extra jars
-artifacts {
-	archives srcJar, deobfJar
+compileTestJava {
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_21
 }
 
-// Configure an upload task.
-uploadArchives {
-	repositories {
-		mavenDeployer {
-			if (project.hasProperty("local_maven")) {
-				repository(url: "file://${local_maven}")
-				pom {
-					groupId = project.group
-					version = project.version
-					artifactId = project.archivesBaseName
-					project {
-						name project.archivesBaseName
-						packaging 'jar'
-						description 'ForgeMultipart'
-						url 'https://github.com/TheCBProject/ForgeMultipart'
-						scm {
-							url 'https://github.com/TheCBProject/ForgeMultipart'
-							connection 'scm:git:git@github.com:TheCBProject/ForgeMultipart.git'
-							developerConnection 'scm:git:git@github.com:TheCBProject/ForgeMultipart.git'
-						}
-						issueManagement {
-							system 'github'
-							url 'https://github.com/TheCBProject/ForgeMultipart/issues'
-						}
-						licenses {
-							license {
-								name 'GNU Lesser Public License (GPL), Version 2.1'
-								url 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt'
-								distribution 'repo'
-							}
-						}
-						developers {
-							developer {
-								id 'chicken-bones'
-								name 'chicken-bones'
-								roles { role 'developer' }
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+test {
+    useJUnitPlatform()
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(21)
+    })
+    if (propertyBool('show_testing_output')) {
+        testLogging {
+            showStandardStreams = true
+        }
+    }
 }
+
+
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(ScalaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+apply from: 'gradle/scripts/publishing.gradle'
+apply from: 'gradle/scripts/extra.gradle'

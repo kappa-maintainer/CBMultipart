@@ -1,25 +1,26 @@
-#Exclude all the things!
-/*
+.gradle
+**/build/
+!src/**/build/
+run/
+out/
 
+# Ignore Gradle GUI config
+gradle-app.setting
 
-#Add back the things that matter.
-# Gradle stuff
-!gradle/
-!gradlew
-!gradlew.bat
-!build.gradle
-!build.properties
-!settings.gradle
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
 
-# Other Files.
-!LICENSE.txt
-!README.md
-!name_textures.py
+# Avoid ignore Gradle wrappper properties
+!gradle-wrapper.properties
 
-# Include git important files
-!.gitmodules
-!.gitignore
+# Cache of project
+.gradletasknamecache
 
-# Include Important Folders
-!src/
-!libs/
+# Eclipse Gradle plugin generated files
+# Eclipse Core
+.project
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+# IDEA config
+.idea
