@@ -3,12 +3,12 @@ package codechicken.multipart.asm
 import java.io.{File, FileOutputStream}
 import java.lang.reflect.{Method, Modifier}
 import java.util.{Set => JSet}
-
 import codechicken.asm.ASMHelper._
 import codechicken.asm.{ASMHelper, InsnComparator, InsnListSection, ModularASMTransformer}
 import codechicken.lib.reflect.ObfMapping
 import codechicken.lib.util.ResourceUtils
 import codechicken.multipart.asm.ASMImplicits._
+import codechicken.multipart.asm.DebugPrinter.logger
 import codechicken.multipart.handler.MultipartProxy
 import net.minecraft.launchwrapper.LaunchClassLoader
 import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper
@@ -19,7 +19,7 @@ import org.objectweb.asm.Type._
 import org.objectweb.asm.tree._
 import org.objectweb.asm.{ClassReader, MethodVisitor, Type}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable.{ListBuffer => MList, Map => MMap, Set => MSet}
 
 object DebugPrinter {
@@ -46,7 +46,7 @@ object DebugPrinter {
             fos.flush()
             fos.close()
         } else if (ModularASMTransformer.DUMP_TEXT) {
-            ASMHelper.dump(bytes, new File(dir, fName + ".txt"), false, false)
+            ASMHelper.dump(bytes, new File(dir, fName + ".txt"), false, false, false)
         }
     }
 
@@ -92,7 +92,7 @@ object ASMMixinCompiler {
         }
 
         def useTransformers = f_transformerExceptions.get(cl).asInstanceOf[JSet[String]]
-            .exists(jName.startsWith)
+          .asScala.exists(jName.startsWith)
 
         val obfName = if (ObfMapping.obfuscated) FMLDeobfuscatingRemapper.INSTANCE.unmap(name).replace('/', '.') else jName
         val bytes = cl.getClassBytes(obfName)
@@ -223,7 +223,7 @@ object ASMMixinCompiler {
 
                 def desc = mnode.desc
 
-                def exceptions = Array(mnode.exceptions: _*)
+                def exceptions = Array(mnode.exceptions.asScala: _*)
 
                 def isPrivate = (mnode.access & ACC_PRIVATE) != 0
 
@@ -234,9 +234,9 @@ object ASMMixinCompiler {
 
             def superClass = Some(cnode.superName)
 
-            def interfaces: Seq[ClassInfo] = cnode.interfaces.map(getClassInfo)
+            def interfaces: Seq[ClassInfo] = cnode.interfaces.asScala.map(getClassInfo)
 
-            def methods = cnode.methods.map(MethodNodeInfoSource)
+            def methods = cnode.methods.asScala.map(MethodNodeInfoSource)
         }
 
         class ScalaClassInfo(cnode$: ClassNode, val sig: ScalaSignature, val csym: ScalaSignature#ClassSymbolRef) extends ClassNodeInfo(cnode$) {
@@ -371,7 +371,7 @@ object ASMMixinCompiler {
         mixinInfos.reverse.foreach { t => //last trait gets first pick on methods
             t.methods.foreach { m =>
                 if (!methodSigs(m.name + m.desc)) {
-                    val mv = cnode.visitMethod(ACC_PUBLIC, m.name, m.desc, null, Array(m.exceptions: _*)).asInstanceOf[MethodNode]
+                    val mv = cnode.visitMethod(ACC_PUBLIC, m.name, m.desc, null, Array(m.exceptions.asScala: _*)).asInstanceOf[MethodNode]
                     writeStaticBridge(mv, m.name, t)
                     methodSigs += m.name + m.desc
                 }
@@ -435,7 +435,7 @@ object ASMMixinCompiler {
         getClassInfo(stack.owner.getInternalName).superClass.flatMap(_.findPublicImpl(methodName, minsn.desc))
     }
 
-    def getAndRegisterParentTraits(cnode: ClassNode) = cnode.interfaces.map(getClassInfo).collect {
+    def getAndRegisterParentTraits(cnode: ClassNode) = cnode.interfaces.asScala.map(getClassInfo).collect {
         case i: ClassInfo.ScalaClassInfo if i.isTrait && !i.csym.isInterface =>
             registerScalaTrait(i.cnode)
     }
@@ -453,10 +453,10 @@ object ASMMixinCompiler {
 
 
         //val parentTraits = getAndRegisterParentTraits(cnode)
-        val fields = cnode.fields.map(f => (f.name, FieldMixin(f.name, f.desc, f.access))).toMap
+        val fields = cnode.fields.asScala.map(f => (f.name, FieldMixin(f.name, f.desc, f.access))).toMap
         val supers = MList[String]() //nameDesc to super owner
         val methods = MList[MethodNode]()
-        val methodSigs = cnode.methods.map(m => m.name + m.desc).toSet
+        val methodSigs = cnode.methods.asScala.map(m => m.name + m.desc).toSet
 
         /*if ((cnode.access & ACC_ABSTRACT) != 0) {//verify all methods are implemented
             def getInterfaces(cnode:ClassNode):Seq[ClassNode] = cnode.interfaces.map(classNode).flatMap(i => getInterfaces(i) :+ i)
@@ -472,7 +472,7 @@ object ASMMixinCompiler {
         inode.sourceFile = cnode.sourceFile
 
         val tnode = new ClassNode() //trait node (interface)
-        tnode.visit(V1_6, ACC_INTERFACE | ACC_ABSTRACT | ACC_PUBLIC, cnode.name, null, "java/lang/Object", Array(cnode.interfaces: _*))
+        tnode.visit(V1_6, ACC_INTERFACE | ACC_ABSTRACT | ACC_PUBLIC, cnode.name, null, "java/lang/Object", Array(cnode.interfaces.asScala: _*))
 
         def fname(name: String) = fields(name).accessName(cnode.name)
 
@@ -493,7 +493,7 @@ object ASMMixinCompiler {
         def staticClone(mnode: MethodNode, name: String, access: Int) = {
             val mv = inode.visitMethod(access | ACC_STATIC, name,
                 staticDesc(cnode.name, mnode.desc),
-                null, Array(mnode.exceptions: _*)).asInstanceOf[MethodNode]
+                null, Array(mnode.exceptions.asScala: _*)).asInstanceOf[MethodNode]
             copy(mnode, mv)
             mv
         }
@@ -564,11 +564,11 @@ object ASMMixinCompiler {
                     insns.add(new MethodInsnNode(INVOKESPECIAL, cnode.superName, "<init>", "()V", false))
 
                     val minsns = new InsnListSection(mv.instructions)
-                    val found = InsnComparator.matches(minsns, insns, Set[LabelNode]())
+                    val found = InsnComparator.matches(minsns, insns, Set[LabelNode]().asJava)
                     if (found == null) {
                         throw new IllegalArgumentException("Invalid constructor insn sequence " + cnode.name + "\n" + minsns)
                     }
-                    found.trim(Set[LabelNode]()).remove()
+                    found.trim(Set[LabelNode]().asJava).remove()
                 }
 
                 removeSuperConstructor()
@@ -577,7 +577,7 @@ object ASMMixinCompiler {
             }
 
             if ((mnode.access & ACC_PRIVATE) == 0) {
-                val mv = tnode.visitMethod(ACC_PUBLIC | ACC_ABSTRACT, mnode.name, mnode.desc, null, Array(mnode.exceptions: _*))
+                val mv = tnode.visitMethod(ACC_PUBLIC | ACC_ABSTRACT, mnode.name, mnode.desc, null, Array(mnode.exceptions.asScala: _*))
                 methods += mv.asInstanceOf[MethodNode]
             }
 
@@ -587,7 +587,7 @@ object ASMMixinCompiler {
             staticTransform(mv, mnode)
         }
 
-        cnode.methods.foreach(convertMethod)
+        cnode.methods.asScala.foreach(convertMethod)
 
         define(inode.name, createBytes(inode, 0))
         define(tnode.name, createBytes(tnode, 0))
@@ -633,7 +633,7 @@ object ASMMixinCompiler {
                 if (sym.name.startsWith("super$")) {
                     supers += sym.name.substring(6) + desc
                 } else if (!sym.isPrivate && !sym.isDeferred && sym.name != "$init$") {
-                    methods += (cnode.methods.find(m => m.name == sym.name && m.desc == desc) match {
+                    methods += (cnode.methods.asScala.find(m => m.name == sym.name && m.desc == desc) match {
                         case Some(m) => m
                         case None => throw new IllegalArgumentException("Unable to add mixin trait " + cnode.name + ": " +
                             sym.name + desc + " found in scala signature but not in class file. Most likely an obfuscation issue.")

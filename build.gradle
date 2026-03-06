@@ -174,6 +174,10 @@ compileJava {
     sourceCompatibility = targetCompatibility = JavaVersion.VERSION_21
 }
 
+compileScala {
+    scalaCompileOptions.additionalParameters = ['-target:jvm-1.8']
+}
+
 jar {
     archiveClassifier = 'deobf'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE

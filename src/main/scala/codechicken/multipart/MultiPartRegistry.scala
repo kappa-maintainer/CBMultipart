@@ -19,7 +19,7 @@ import net.minecraft.world.World
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{ListBuffer, Map => MMap}
 
@@ -186,14 +186,14 @@ object MultiPartRegistry {
      * Calls converters to create a multipart version of the block at pos
      */
     def convertBlock(world: World, pos: BlockPos, state: IBlockState): Iterable[TMultiPart] = {
-        converters.find(_.canConvert(world, pos, state)) match {
+        converters.asScala.find(_.canConvert(world, pos, state)) match {
             case Some(p) => p.convertToParts(world, pos, state)
-            case None => Seq()
+            case None => Seq().asJava
         }
     }
 
     def convertItem(stack:ItemStack, world:World, pos:BlockPos, sideHit:EnumFacing, hitVec:Vec3d, entityPlayer:EntityLivingBase, hand:EnumHand) = {
-        placementConverters.find(_.canConvert(stack)) match {
+        placementConverters.asScala.find(_.canConvert(stack)) match {
             case Some(p) => p.convert(stack, world, pos, sideHit, hitVec, entityPlayer, hand)
             case None => null
         }

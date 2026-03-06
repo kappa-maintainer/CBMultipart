@@ -21,7 +21,7 @@ import net.minecraft.util.{BlockRenderLayer, EnumFacing, EnumHand}
 import net.minecraft.world.{Explosion, IBlockAccess, World}
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
  * Internal RayTracing class that can save parts as part of their hit data
@@ -113,7 +113,7 @@ class BlockMultipart extends Block(Material.ROCK) {
     def rayTraceAll(world: World, pos: BlockPos, start: Vec3d, end: Vec3d): Iterable[PartRayTraceResult] =
         getTile(world, pos) match {
             case null => Seq()
-            case tile => tile.rayTraceAll(start, end)
+            case tile => tile.rayTraceAll(start, end).asScala
         }
 
     override def getBlockFaceShape(world: IBlockAccess, state: IBlockState, pos: BlockPos, side: EnumFacing) =
@@ -202,7 +202,7 @@ class BlockMultipart extends Block(Material.ROCK) {
         }
     }
 
-    override def onEntityCollidedWithBlock(world: World, pos: BlockPos, state: IBlockState, entity: Entity) {
+    override def onEntityCollision(world: World, pos: BlockPos, state: IBlockState, entity: Entity) {
         getTile(world, pos) match {
             case null =>
             case tile => tile.onEntityCollision(entity)

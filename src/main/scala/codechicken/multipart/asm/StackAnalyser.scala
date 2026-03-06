@@ -5,7 +5,7 @@ import org.objectweb.asm.Type
 import org.objectweb.asm.Type._
 import org.objectweb.asm.tree._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable.{ListBuffer => MList, Map => MMap}
 
 object StackAnalyser {
@@ -126,7 +126,7 @@ class StackAnalyser(val owner: Type, val m: MethodNode) {
         for (i <- 0 until ptypes.length)
             pushL(Param(i, ptypes(i)))
 
-        m.tryCatchBlocks.foreach(b => catchHandlers.put(b.handler, b))
+        m.tryCatchBlocks.asScala.foreach(b => catchHandlers.put(b.handler, b))
     }
 
     def pushL(entry: LocalEntry) = setL(locals.size, entry)

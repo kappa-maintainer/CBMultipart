@@ -10,7 +10,7 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.util.{BlockRenderLayer, ResourceLocation}
 import org.lwjgl.opengl.GL11
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object HollowPlacement extends PlacementProperties {
 
@@ -173,7 +173,7 @@ trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclu
 
     def getBounds: Cuboid6 = FaceMicroFactory.aBounds(shape)
 
-    override def getPartialOcclusionBoxes = HollowMicroFactory.pBoxes(shape)
+    override def getPartialOcclusionBoxes = HollowMicroFactory.pBoxes(shape).asJava
 
     def getHollowSize = tile match {
         case null => 8
@@ -194,7 +194,7 @@ trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclu
         val y2 = c.max.y
         val z1 = c.min.z
         val z2 = c.max.z
-
+        asJavaIterable(
         getSlot match {
             case 0 | 1 =>
                 Seq(new Cuboid6(d2, y1, d1, x2, y2, d2),
@@ -211,7 +211,7 @@ trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclu
                     new Cuboid6(x1, d1, z1, x2, d2, d1),
                     new Cuboid6(x1, d2, z1, x2, y2, z2),
                     new Cuboid6(x1, y1, z1, x2, d1, z2))
-        }
+        })
     }
 
     override def getCollisionBoxes = {
@@ -225,10 +225,10 @@ trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclu
             new Cuboid6(0, 0, d2, 1, t, 1),
             new Cuboid6(0, 0, d1, d1, t, d2),
             new Cuboid6(d2, 0, d1, 1, t, d2))
-            .map(c => c.apply(tr))
+            .map(c => c.apply(tr)).asJava
     }
 
-    override def getSubParts = getCollisionBoxes.map(c => new IndexedCuboid6(0, c))
+    override def getSubParts = getCollisionBoxes.asScala.map(c => new IndexedCuboid6(0, c)).asJava
 
     override def allowCompleteOcclusion = true
 

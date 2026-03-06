@@ -67,7 +67,7 @@ object MultipartSaveLoad {
             if (!failed && !loaded) {
                 if (tag != null) {
                     val newTile = TileMultipart.createFromNBT(tag)
-                    val chunk = world.getChunkFromBlockCoords(pos)
+                    val chunk = world.getChunk(pos)
                     if (newTile != null) {
                         newTile.validate()
                         world.setTileEntity(pos, newTile)

@@ -11,7 +11,7 @@ import org.objectweb.asm.Opcodes._
 import org.objectweb.asm.tree.{ClassNode, MethodNode}
 import org.objectweb.asm.{FieldVisitor, Label, MethodVisitor}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object MultipartMixinFactory extends ASMMixinFactory(classOf[TileMultipart]) {
     override protected def autoCompleteJavaTrait(cnode: ClassNode) {
@@ -26,7 +26,7 @@ object MultipartMixinFactory extends ASMMixinFactory(classOf[TileMultipart]) {
             val end = new Label()
             mv.visitJumpInsn(IFEQ, end)
 
-            cnode.fields.foreach { f =>
+            cnode.fields.asScala.foreach { f =>
                 mv.visitVarInsn(ALOAD, 0)
                 mv.visitVarInsn(ALOAD, 1)
                 mv.visitFieldInsn(GETFIELD, cnode.name, f.name, f.desc)
@@ -146,16 +146,16 @@ object MultipartMixinFactory extends ASMMixinFactory(classOf[TileMultipart]) {
         }
 
         def methods(cnode: ClassNode): Map[String, MethodNode] = {
-            val m = cnode.methods.map(m => (m.name + m.desc, m)).toMap
+            val m = cnode.methods.asScala.map(m => (m.name + m.desc, m)).toMap
             if (cnode.interfaces != null) {
-                m ++ cnode.interfaces.flatMap(i => methods(classNode(i)))
+                m ++ cnode.interfaces.asScala.flatMap(i => methods(classNode(i)))
             } else {
                 m
             }
         }
 
         def generatePassThroughMethod(m: MethodNode) {
-            mv = cw.visitMethod(ACC_PUBLIC, m.name, m.desc, m.signature, Array(m.exceptions: _*))
+            mv = cw.visitMethod(ACC_PUBLIC, m.name, m.desc, m.signature, Array(m.exceptions.asScala: _*))
             mv.visitVarInsn(ALOAD, 0)
             mv.visitFieldInsn(GETFIELD, tname, vname, idesc)
             finishBridgeCall(mv, m.desc, INVOKEINTERFACE, iname, m.name, m.desc)

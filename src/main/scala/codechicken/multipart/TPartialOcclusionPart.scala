@@ -4,7 +4,7 @@ import java.lang.Iterable
 
 import codechicken.lib.vec.Cuboid6
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
  * This class provides a special type of occlusion model used by microblocks.
@@ -27,7 +27,7 @@ class PartialOcclusionTest(size: Int) {
 
     def fill(i: Int, boxes: Iterable[Cuboid6], complete: Boolean) {
         partial(i) = !complete
-        boxes.foreach(box => fill(i + 1, box))
+        boxes.asScala.foreach(box => fill(i + 1, box))
     }
 
     def fill(v: Int, box: Cuboid6) {

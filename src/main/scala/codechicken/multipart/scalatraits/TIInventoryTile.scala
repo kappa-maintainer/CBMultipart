@@ -9,7 +9,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.text.TextComponentString
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 
 trait TIInventoryTile extends TileMultipart with ISidedInventory {
@@ -27,7 +27,7 @@ trait TIInventoryTile extends TileMultipart with ISidedInventory {
     override def bindPart(part: TMultiPart) {
         super.bindPart(part)
         if (part.isInstanceOf[IInventory]) {
-            invList += part.asInstanceOf[IInventory]
+            invList.asScala += part.asInstanceOf[IInventory]
             rebuildSlotMap()
         }
     }
@@ -35,7 +35,7 @@ trait TIInventoryTile extends TileMultipart with ISidedInventory {
     override def partRemoved(part: TMultiPart, p: Int) {
         super.partRemoved(part, p)
         if (part.isInstanceOf[IInventory]) {
-            invList -= part.asInstanceOf[IInventory]
+            invList.asScala -= part.asInstanceOf[IInventory]
             rebuildSlotMap()
         }
     }
@@ -47,9 +47,9 @@ trait TIInventoryTile extends TileMultipart with ISidedInventory {
     }
 
     def rebuildSlotMap() {
-        slotMap = Array.ofDim(invList.map(_.getSizeInventory).sum)
+        slotMap = Array.ofDim(invList.asScala.map(_.getSizeInventory).sum)
         var i = 0
-        for (inv <- invList; s <- 0 until inv.getSizeInventory) {
+        for (inv <- invList.asScala; s <- 0 until inv.getSizeInventory) {
             slotMap(i) = (inv, s)
             i += 1
         }
@@ -112,13 +112,13 @@ trait TIInventoryTile extends TileMultipart with ISidedInventory {
     override def getFieldCount = 0
 
     override def clear() {
-        for (inv <- invList) inv.clear()
+        for (inv <- invList.asScala) inv.clear()
     }
 
     override def getSlotsForFace(side: EnumFacing) = {
         val buf = new ArrayBuffer[Int]()
         var base = 0
-        for (inv <- invList) {
+        for (inv <- invList.asScala) {
             inv match {
                 case is: ISidedInventory => buf ++= is.getSlotsForFace(side).map(_ + base)
                 case _ =>

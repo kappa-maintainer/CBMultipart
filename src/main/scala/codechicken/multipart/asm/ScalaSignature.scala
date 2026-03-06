@@ -5,7 +5,7 @@ import java.util.{List => JList}
 import codechicken.multipart.asm.ScalaSignature._
 import org.objectweb.asm.tree.{AnnotationNode, ClassNode}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object ScalaSignature {
 
@@ -374,6 +374,6 @@ object ScalaSigReader {
 
     def ann(cnode: ClassNode): Option[AnnotationNode] = cnode.visibleAnnotations match {
         case null => None
-        case a => a.find(ann => ann.desc.equals("Lscala/reflect/ScalaSignature;"))
+        case a => a.asScala.find(ann => ann.desc.equals("Lscala/reflect/ScalaSignature;"))
     }
 }

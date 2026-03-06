@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.eventhandler.{EventPriority, SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object MultipartEventHandler {
 
@@ -39,7 +39,7 @@ object MultipartEventHandler {
     @SubscribeEvent
     def serverTick(event: TickEvent.ServerTickEvent) {
         if (event.phase == TickEvent.Phase.END) {
-            MultipartSPH.onTickEnd(FMLCommonHandler.instance().getMinecraftServerInstance.getPlayerList.getPlayers)
+            MultipartSPH.onTickEnd(FMLCommonHandler.instance().getMinecraftServerInstance.getPlayerList.getPlayers.asScala)
         }
     }
 

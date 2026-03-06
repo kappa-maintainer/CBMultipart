@@ -23,7 +23,7 @@ import net.minecraftforge.client.MinecraftForgeClient
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import org.lwjgl.opengl.GL11
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
  * Internal class for rendering callbacks. Should be moved to the handler package
@@ -45,7 +45,7 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TTESRRenderTile] with
         val pass = MinecraftForgeClient.getRenderPass
         val ccrs = CCRenderState.instance()
         ccrs.reset()
-        if (tile.fastRenderParts.nonEmpty) {
+        if (tile.fastRenderParts.asScala.nonEmpty) {
             //Whoo batch buffer is drawing, Lets use that.
             if (batchBuffer != null && batchBuffer.getBuffer.isDrawing) {
                 val buffer = batchBuffer.getBuffer
@@ -78,7 +78,7 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TTESRRenderTile] with
                 GlStateManager.disableBlend()
             }
         }
-        if (tile.dynamicRenderParts.nonEmpty) {
+        if (tile.dynamicRenderParts.asScala.nonEmpty) {
             tile.renderDynamic(pos, pass, delta)
         }
     }

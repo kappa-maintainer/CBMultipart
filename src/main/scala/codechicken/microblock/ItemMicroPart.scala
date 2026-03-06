@@ -1,7 +1,5 @@
 package codechicken.microblock
 
-import java.util.{List => JList}
-
 import codechicken.lib.raytracer.RayTracer
 import codechicken.lib.render.CCRenderState
 import codechicken.lib.render.item.IItemRenderer
@@ -26,7 +24,7 @@ import net.minecraftforge.common.model.IModelState
 import org.lwjgl.opengl.GL11
 
 class ItemMicroPart extends Item {
-    setUnlocalizedName("microblock")
+    setTranslationKey("microblock")
     setHasSubtypes(true)
 
     override def getItemStackDisplayName(stack: ItemStack): String = {
@@ -37,7 +35,7 @@ class ItemMicroPart extends Item {
             return "Unnamed"
         }
 
-        I18n.translateToLocalFormatted(mcrFactory.getName.getResourcePath + "." + size + ".name", material.getLocalizedName)
+        I18n.translateToLocalFormatted(mcrFactory.getName.getPath + "." + size + ".name", material.getLocalizedName)
     }
 
     override def getSubItems(tab: CreativeTabs, list: NonNullList[ItemStack]) {

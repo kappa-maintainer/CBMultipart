@@ -20,7 +20,7 @@ import net.minecraft.util.text.{TextComponentString, TextComponentTranslation}
 import net.minecraft.world.World
 import net.minecraft.world.chunk.Chunk
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable.{HashMap => MHashMap, Map => MMap, MultiMap => MMultiMap, Set => MSet}
 
 class MultipartPH {
@@ -120,7 +120,7 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
     def onTickEnd(players: Seq[EntityPlayerMP]) {
         PacketScheduler.sendScheduled()
 
-        for (p <- players if chunkWatchers.containsKey(p.getEntityId)) {
+        for (p <- players if chunkWatchers.asJava.containsKey(p.getEntityId)) {
             updateMap.get(p.world) match {
                 case Some(m) if m.nonEmpty =>
                     val chunks = chunkWatchers(p.getEntityId)
@@ -140,9 +140,9 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
             }
         }
         updateMap.foreach(_._2.clear())
-        for (p <- players if newWatchers.containsKey(p.getEntityId)) {
-            for (c <- newWatchers(p.getEntityId)) {
-                val chunk = p.world.getChunkFromChunkCoords(c.x, c.z)
+        for (p <- players if newWatchers.asJava.containsKey(p.getEntityId)) {
+            for (c <- newWatchers(p.getEntityId).asScala) {
+                val chunk = p.world.getChunk(c.x, c.z)
                 val pkt = getDescPacket(chunk, chunk.getTileEntityMap.values.iterator)
                 if (pkt != null) pkt.sendToPlayer(p)
                 chunkWatchers.addBinding(p.getEntityId, c)

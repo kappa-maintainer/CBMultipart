@@ -5,7 +5,7 @@ import java.util.{LinkedList => JLinkedList}
 import codechicken.multipart.{TMultiPart, TileMultipart}
 import net.minecraft.util.ITickable
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
  * Mixin Trait for parts implementing ITickable. Allows parts
@@ -31,7 +31,7 @@ trait TTickableTile extends TileMultipart with ITickable {
         super.bindPart(part)
         part match {
             case tickingPart: ITickable =>
-                tickingParts += tickingPart
+                tickingParts.asScala += tickingPart
                 setTicking(true)
             case _ =>
         }
@@ -40,7 +40,7 @@ trait TTickableTile extends TileMultipart with ITickable {
     override def partRemoved(part: TMultiPart, p: Int) {
         super.partRemoved(part, p)
         part match {
-            case tickingPart: ITickable => tickingParts -= tickingPart
+            case tickingPart: ITickable => tickingParts.asScala -= tickingPart
             //No need to disable ticking if empty, this tile will be replaced w/ nonticking one anyway
             case _ =>
         }

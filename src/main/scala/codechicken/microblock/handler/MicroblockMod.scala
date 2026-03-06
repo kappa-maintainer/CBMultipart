@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.Mod.EventHandler
 import net.minecraftforge.fml.common.event.FMLInterModComms.IMCEvent
 import net.minecraftforge.fml.common.event.{FMLInitializationEvent, FMLPostInitializationEvent, FMLPreInitializationEvent, FMLServerAboutToStartEvent}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 @Mod(modid = "microblockcbe", version = Reference.VERSION, acceptedMinecraftVersions = CodeChickenLib.MC_VERSION_DEP, dependencies = "required-after:forgemultipartcbe", modLanguage = "scala")
 object MicroblockMod {
@@ -38,6 +38,6 @@ object MicroblockMod {
 
     @EventHandler
     def handleIMC(event: IMCEvent): Unit = {
-        ConfigContent.handleIMC(event.getMessages)
+        ConfigContent.handleIMC(event.getMessages.asScala)
     }
 }

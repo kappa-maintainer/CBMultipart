@@ -18,7 +18,7 @@ import net.minecraft.util.math.{BlockPos, Vec3d}
 import net.minecraft.util.{BlockRenderLayer, EnumHand, ResourceLocation}
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 abstract class TMultiPart {
     /**
@@ -104,7 +104,7 @@ abstract class TMultiPart {
      * Return a list of entity collision boxes.
      * Note all Cuboid6's returned by methods in TMultiPart should be within (0,0,0)->(1,1,1)
      */
-    def getCollisionBoxes: JIterable[Cuboid6] = Seq()
+    def getCollisionBoxes: JIterable[Cuboid6] = Seq().asJava
 
     /**
      * Perform a raytrace of this part. The default implementation does a Cuboid6 ray trace on bounding boxes returned from getSubParts.
@@ -112,14 +112,14 @@ abstract class TMultiPart {
      * The returned CuboidRayTraceResult will be passed to methods such as 'activate' so it is recommended to use the data field to indicate information about the hit area.
      */
     def collisionRayTrace(start: Vec3d, end: Vec3d): CuboidRayTraceResult = {
-        val boxes = getSubParts.map { _.copy }
-        RayTracer.rayTraceCuboidsClosest(start, end, tile.getPos, boxes.toList)
+        val boxes = getSubParts.asScala.map { _.copy }
+        RayTracer.rayTraceCuboidsClosest(start, end, tile.getPos, boxes.toList.asJava)
     }
 
     /**
      * For the default collisionRayTrace implementation, returns a list of indexed bounding boxes. The data field of ExtendedMOP will be set to the index of the cuboid the raytrace hit.
      */
-    def getSubParts: JIterable[IndexedCuboid6] = Seq()
+    def getSubParts: JIterable[IndexedCuboid6] = Seq().asJava
 
     /**
      * Harvest this part, removing it from the container tile and dropping items if necessary.
@@ -137,7 +137,7 @@ abstract class TMultiPart {
     /**
      * Return a list of items that should be dropped when this part is destroyed.
      */
-    def getDrops: JIterable[ItemStack] = Seq()
+    def getDrops: JIterable[ItemStack] = Seq().asJava
 
     /**
      * Return the itemstack for the middle click pick-block function.
