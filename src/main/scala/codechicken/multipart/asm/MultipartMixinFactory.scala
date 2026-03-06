@@ -155,7 +155,7 @@ object MultipartMixinFactory extends ASMMixinFactory(classOf[TileMultipart]) {
         }
 
         def generatePassThroughMethod(m: MethodNode) {
-            mv = cw.visitMethod(ACC_PUBLIC, m.name, m.desc, m.signature, Array(m.exceptions.asScala: _*))
+            mv = cw.visitMethod(ACC_PUBLIC, m.name, m.desc, m.signature, Array(m.exceptions.asScala.toSeq: _*))
             mv.visitVarInsn(ALOAD, 0)
             mv.visitFieldInsn(GETFIELD, tname, vname, idesc)
             finishBridgeCall(mv, m.desc, INVOKEINTERFACE, iname, m.name, m.desc)

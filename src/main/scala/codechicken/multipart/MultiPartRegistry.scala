@@ -142,7 +142,7 @@ object MultiPartRegistry {
                 nameToID.put(s, i)
             }
         }
-        missing
+        missing.toSeq
     }
 
     /**

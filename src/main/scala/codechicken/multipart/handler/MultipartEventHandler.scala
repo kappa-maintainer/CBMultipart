@@ -39,7 +39,7 @@ object MultipartEventHandler {
     @SubscribeEvent
     def serverTick(event: TickEvent.ServerTickEvent) {
         if (event.phase == TickEvent.Phase.END) {
-            MultipartSPH.onTickEnd(FMLCommonHandler.instance().getMinecraftServerInstance.getPlayerList.getPlayers.asScala)
+            MultipartSPH.onTickEnd(FMLCommonHandler.instance().getMinecraftServerInstance.getPlayerList.getPlayers.asScala.toSeq)
         }
     }
 

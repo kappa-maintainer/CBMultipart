@@ -218,7 +218,7 @@ object MicroMaterialRegistry {
             }
         }
 
-        missing
+        missing.toSeq
     }
 
     def writeMaterialID(data: MCDataOutput, id: Int) {

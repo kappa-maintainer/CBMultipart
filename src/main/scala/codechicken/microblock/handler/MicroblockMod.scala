@@ -38,6 +38,6 @@ object MicroblockMod {
 
     @EventHandler
     def handleIMC(event: IMCEvent): Unit = {
-        ConfigContent.handleIMC(event.getMessages.asScala)
+        ConfigContent.handleIMC(event.getMessages.asScala.toSeq)
     }
 }

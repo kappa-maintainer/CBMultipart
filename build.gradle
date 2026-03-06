@@ -35,7 +35,7 @@ base {
 }
 
 scala {
-    scalaVersion = '2.12.21'
+    scalaVersion = '2.13.18'
 }
 
 java {
@@ -175,7 +175,7 @@ compileJava {
 }
 
 compileScala {
-    scalaCompileOptions.additionalParameters = ['-target:jvm-1.8']
+    scalaCompileOptions.additionalParameters = ['-target:jvm-21']
 }
 
 jar {

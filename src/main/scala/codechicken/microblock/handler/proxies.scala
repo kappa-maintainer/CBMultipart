@@ -57,7 +57,7 @@ class MicroblockProxy_serverImpl {
         showAllMicroparts = config.getTag("showAllMicroparts").setComment("Set this to true to show all MicroParts in JEI. By default only Stone is shown.").getBooleanValue(false)
     }
 
-    protected var saws = mutable.MutableList[Item]()
+    protected var saws = mutable.ListBuffer[Item]()
 
     def createSaw(config: ConfigFile, name: String, strength: Int): ItemSaw = {
         val saw = new ItemSaw(config.getTag(name).useBraces(), strength)

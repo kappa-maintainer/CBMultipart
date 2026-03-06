@@ -223,7 +223,7 @@ object ASMMixinCompiler {
 
                 def desc = mnode.desc
 
-                def exceptions = Array(mnode.exceptions.asScala: _*)
+                def exceptions = Array(mnode.exceptions.asScala.toSeq: _*)
 
                 def isPrivate = (mnode.access & ACC_PRIVATE) != 0
 
@@ -234,7 +234,7 @@ object ASMMixinCompiler {
 
             def superClass = Some(cnode.superName)
 
-            def interfaces: Seq[ClassInfo] = cnode.interfaces.asScala.map(getClassInfo)
+            def interfaces: Seq[ClassInfo] = cnode.interfaces.asScala.map(getClassInfo).toSeq
 
             def methods = cnode.methods.asScala.map(MethodNodeInfoSource)
         }
@@ -371,7 +371,7 @@ object ASMMixinCompiler {
         mixinInfos.reverse.foreach { t => //last trait gets first pick on methods
             t.methods.foreach { m =>
                 if (!methodSigs(m.name + m.desc)) {
-                    val mv = cnode.visitMethod(ACC_PUBLIC, m.name, m.desc, null, Array(m.exceptions.asScala: _*)).asInstanceOf[MethodNode]
+                    val mv = cnode.visitMethod(ACC_PUBLIC, m.name, m.desc, null, Array(m.exceptions.asScala.toSeq: _*)).asInstanceOf[MethodNode]
                     writeStaticBridge(mv, m.name, t)
                     methodSigs += m.name + m.desc
                 }
@@ -472,7 +472,7 @@ object ASMMixinCompiler {
         inode.sourceFile = cnode.sourceFile
 
         val tnode = new ClassNode() //trait node (interface)
-        tnode.visit(V1_6, ACC_INTERFACE | ACC_ABSTRACT | ACC_PUBLIC, cnode.name, null, "java/lang/Object", Array(cnode.interfaces.asScala: _*))
+        tnode.visit(V1_6, ACC_INTERFACE | ACC_ABSTRACT | ACC_PUBLIC, cnode.name, null, "java/lang/Object", Array(cnode.interfaces.asScala.toSeq: _*))
 
         def fname(name: String) = fields(name).accessName(cnode.name)
 
@@ -493,7 +493,7 @@ object ASMMixinCompiler {
         def staticClone(mnode: MethodNode, name: String, access: Int) = {
             val mv = inode.visitMethod(access | ACC_STATIC, name,
                 staticDesc(cnode.name, mnode.desc),
-                null, Array(mnode.exceptions.asScala: _*)).asInstanceOf[MethodNode]
+                null, Array(mnode.exceptions.asScala.toSeq: _*)).asInstanceOf[MethodNode]
             copy(mnode, mv)
             mv
         }
@@ -577,7 +577,7 @@ object ASMMixinCompiler {
             }
 
             if ((mnode.access & ACC_PRIVATE) == 0) {
-                val mv = tnode.visitMethod(ACC_PUBLIC | ACC_ABSTRACT, mnode.name, mnode.desc, null, Array(mnode.exceptions.asScala: _*))
+                val mv = tnode.visitMethod(ACC_PUBLIC | ACC_ABSTRACT, mnode.name, mnode.desc, null, Array(mnode.exceptions.asScala.toSeq: _*))
                 methods += mv.asInstanceOf[MethodNode]
             }
 
@@ -593,7 +593,7 @@ object ASMMixinCompiler {
         define(tnode.name, createBytes(tnode, 0))
 
         mixinMap.put(tnode.name, MixinInfo(tnode.name, cnode.superName, Seq(),
-            fields.values.toSeq, methods, supers))
+            fields.values.toSeq, methods.toSeq, supers.toSeq))
     }
 
     def listSideOnly(sig: ScalaSignature) = {
@@ -646,7 +646,7 @@ object ASMMixinCompiler {
             }
         }
 
-        val mixin = MixinInfo(cnode.name, csym.jParent, parentTraits, fields, methods, supers)
+        val mixin = MixinInfo(cnode.name, csym.jParent, parentTraits.toSeq, fields.toSeq, methods.toSeq, supers.toSeq)
         mixinMap.put(cnode.name, mixin)
         mixin
     }
