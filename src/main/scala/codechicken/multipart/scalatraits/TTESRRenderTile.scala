@@ -14,7 +14,7 @@ trait TTESRRenderTile extends TileMultipartClient {
     var fastRenderParts = new JLinkedList[TFastRenderPart]
     var dynamicRenderParts = new JLinkedList[TDynamicRenderPart]
 
-    override def copyFrom(that: TileMultipart) {
+    override def copyFrom(that: TileMultipart): Unit = {
         super.copyFrom(that)
         that match {
             case tile: TTESRRenderTile =>
@@ -24,7 +24,7 @@ trait TTESRRenderTile extends TileMultipartClient {
         }
     }
 
-    override def bindPart(part: TMultiPart) {
+    override def bindPart(part: TMultiPart): Unit = {
         super.bindPart(part)
         part match {
             case fastPart: TFastRenderPart => fastRenderParts.asScala += fastPart
@@ -36,7 +36,7 @@ trait TTESRRenderTile extends TileMultipartClient {
         }
     }
 
-    override def partRemoved(part: TMultiPart, p: Int) {
+    override def partRemoved(part: TMultiPart, p: Int): Unit = {
         super.partRemoved(part, p)
         part match {
             case fastPart: TFastRenderPart => fastRenderParts.asScala -= fastPart
@@ -48,17 +48,17 @@ trait TTESRRenderTile extends TileMultipartClient {
         }
     }
 
-    override def clearParts() {
+    override def clearParts(): Unit = {
         super.clearParts()
         fastRenderParts.clear()
         dynamicRenderParts.clear()
     }
 
-    def renderFast(pos: Vector3, pass: Int, frameDelta: Float, ccrs: CCRenderState) {
+    def renderFast(pos: Vector3, pass: Int, frameDelta: Float, ccrs: CCRenderState): Unit = {
         fastRenderParts.asScala.filter(_.canRenderFast(pass)).foreach(_.renderFast(ccrs, pos, pass, frameDelta))
     }
 
-    def renderDynamic(pos: Vector3, pass: Int, frameDelta: Float) {
+    def renderDynamic(pos: Vector3, pass: Int, frameDelta: Float): Unit = {
         dynamicRenderParts.asScala.filter(_.canRenderDynamic(pass)).foreach(_.renderDynamic(pos, pass, frameDelta))
     }
 

@@ -10,29 +10,29 @@ import net.minecraft.util.math.{BlockPos, RayTraceResult}
 import net.minecraft.world.World
 
 abstract class ExecutablePlacement(val pos: BlockPos, val part: Microblock) {
-    def place(world: World, player: EntityPlayer, item: ItemStack)
+    def place(world: World, player: EntityPlayer, item: ItemStack): Unit 
 
-    def consume(world: World, player: EntityPlayer, item: ItemStack)
+    def consume(world: World, player: EntityPlayer, item: ItemStack): Unit 
 }
 
 class AdditionPlacement($pos: BlockPos, $part: Microblock) extends ExecutablePlacement($pos, $part) {
-    def place(world: World, player: EntityPlayer, item: ItemStack) {
+    def place(world: World, player: EntityPlayer, item: ItemStack): Unit = {
         TileMultipart.addPart(world, pos, part)
     }
 
-    def consume(world: World, player: EntityPlayer, item: ItemStack) {
+    def consume(world: World, player: EntityPlayer, item: ItemStack): Unit = {
         item.shrink(1)
     }
 }
 
 class ExpandingPlacement($pos: BlockPos, $part: Microblock, opart: Microblock) extends ExecutablePlacement($pos, $part) {
-    def place(world: World, player: EntityPlayer, item: ItemStack) {
+    def place(world: World, player: EntityPlayer, item: ItemStack): Unit = {
         opart.shape = part.shape
         opart.tile.notifyPartChange(opart)
         opart.sendShapeUpdate()
     }
 
-    def consume(world: World, player: EntityPlayer, item: ItemStack) {
+    def consume(world: World, player: EntityPlayer, item: ItemStack): Unit = {
         item.shrink(1)
     }
 }

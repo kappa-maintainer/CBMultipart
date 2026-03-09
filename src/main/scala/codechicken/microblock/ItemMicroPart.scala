@@ -38,7 +38,7 @@ class ItemMicroPart extends Item {
         I18n.translateToLocalFormatted(mcrFactory.getName.getPath + "." + size + ".name", material.getLocalizedName)
     }
 
-    override def getSubItems(tab: CreativeTabs, list: NonNullList[ItemStack]) {
+    override def getSubItems(tab: CreativeTabs, list: NonNullList[ItemStack]): Unit = {
         if (MicroMaterialRegistry.getIdMap != null && isInCreativeTab(tab)) {
             for (factoryID <- factories.indices) {
                 val factory = factories(factoryID)
@@ -86,7 +86,7 @@ class ItemMicroPart extends Item {
 }
 
 object ItemMicroPart {
-    def checkTagCompound(stack: ItemStack) {
+    def checkTagCompound(stack: ItemStack): Unit = {
         if (!stack.hasTagCompound) {
             stack.setTagCompound(new NBTTagCompound())
         }
@@ -162,7 +162,7 @@ object ItemMicroPartRenderer extends IItemRenderer {
 
     override def getTransforms: IModelState = TransformUtils.DEFAULT_BLOCK
 
-    override def renderItem(item: ItemStack, transformType: TransformType) {
+    override def renderItem(item: ItemStack, transformType: TransformType): Unit = {
         val material = getMaterial(item)
         val factory = getFactory(item)
         val size = getSize(item)

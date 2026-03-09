@@ -18,7 +18,7 @@ import org.lwjgl.opengl.GL11._
 import scala.collection.JavaConverters._
 
 object MicroblockRender {
-    def renderHighlight(player: EntityPlayer, hit: RayTraceResult, mcrFactory: CommonMicroFactory, size: Int, material: Int) {
+    def renderHighlight(player: EntityPlayer, hit: RayTraceResult, mcrFactory: CommonMicroFactory, size: Int, material: Int): Unit = {
         mcrFactory.placementProperties.placementGrid.render(new Vector3(hit.hitVec), hit.sideHit.ordinal)
 
         val placement = MicroblockPlacement(player, hit, size, material, !player.capabilities.isCreativeMode, mcrFactory.placementProperties)
@@ -56,7 +56,7 @@ object MicroblockRender {
 
     def face = instances.get()
 
-    def renderCuboid(pos: Vector3, ccrs: CCRenderState, mat: IMicroMaterial, layer: BlockRenderLayer, c: Cuboid6, faces: Int) {
+    def renderCuboid(pos: Vector3, ccrs: CCRenderState, mat: IMicroMaterial, layer: BlockRenderLayer, c: Cuboid6, faces: Int): Unit = {
         MicroMaterialRegistry.loadIcons()
 
         val f = face
@@ -65,7 +65,7 @@ object MicroblockRender {
             f.loadCuboidFace(c, s)
             val ops = mat.getMicroRenderOps(pos, s, layer, c)
             for (opSet <- ops)
-                ccrs.render(opSet: _*)
+                ccrs.render(opSet*)
         }
     }
 
@@ -86,7 +86,7 @@ object MicroblockRender {
                 buffer.reset()
                 buffer.begin(0x07, DefaultVertexFormats.ITEM)
                 ccrs.bind(buffer)
-                ccrs.setPipeline(f, 0, f.getVertices.length, opSet: _*)
+                ccrs.setPipeline(f, 0, f.getVertices.length, opSet*)
                 ccrs.render()
                 buffer.finishDrawing()
                 list ++= buffer.bake().asScala

@@ -63,13 +63,13 @@ class BlockMicroMaterial(val state: IBlockState, val materialID: String) extends
     val blockKey = state.getPropertyKeys
 
     @SideOnly(Side.CLIENT)
-    var icont: MultiIconTransformation = _
+    var icont: MultiIconTransformation = scala.compiletime.uninitialized
 
     @SideOnly(Side.CLIENT)
-    var pIconT: IconTransformation = _
+    var pIconT: IconTransformation = scala.compiletime.uninitialized
 
     @SideOnly(Side.CLIENT)
-    override def loadIcons() {
+    override def loadIcons(): Unit = {
         @SideOnly(Side.CLIENT)
         def getSideIcon(state: IBlockState, s: Int): TextureAtlasSprite = {
             val side = EnumFacing.VALUES(s)
@@ -93,7 +93,7 @@ class BlockMicroMaterial(val state: IBlockState, val materialID: String) extends
         }
 
         try {
-            icont = new MultiIconTransformation(Array.tabulate(6)(side => getSideIcon(state, side)): _*)
+            icont = new MultiIconTransformation(Array.tabulate(6)(side => getSideIcon(state, side))*)
             pIconT = new IconTransformation(TextureUtils.getParticleIconForBlock(state))
         } catch {
             case e: RuntimeException =>
@@ -179,20 +179,20 @@ object BlockMicroMaterial {
         key
     }
 
-    def createAndRegister(block: Block) {
+    def createAndRegister(block: Block): Unit = {
         createAndRegister(block.getDefaultState)
     }
 
-    def createAndRegister(state: IBlockState) {
+    def createAndRegister(state: IBlockState): Unit = {
         val id = materialKey(state)
         MicroMaterialRegistry.registerMaterial(new BlockMicroMaterial(state, id), id)
     }
 
-    def createAndRegister(states: Seq[IBlockState]) {
+    def createAndRegister(states: Seq[IBlockState]): Unit = {
         states.foreach(createAndRegister)
     }
 
-    def createAndRegister(block: Block, metas: Seq[Int]) {
+    def createAndRegister(block: Block, metas: Seq[Int]): Unit = {
         createAndRegister(metas map block.getStateFromMeta)
     }
 }

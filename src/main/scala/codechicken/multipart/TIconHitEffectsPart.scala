@@ -18,17 +18,17 @@ import net.minecraftforge.fml.relauncher.{Side, SideOnly}
  * TIconHitEffects is a trait for scala implementors that does includes the overrides/static calls that Java programmers need to include themselves.
  */
 object IconHitEffects {
-    def addHitEffects(part: TIconHitEffectsPart, hit: CuboidRayTraceResult, manager: ParticleManager) {
+    def addHitEffects(part: TIconHitEffectsPart, hit: CuboidRayTraceResult, manager: ParticleManager): Unit = {
         CustomParticleHandler.addBlockHitEffects(part.tile.getWorld,
             part.getBounds.copy.add(Vector3.fromTile(part.tile)),
             hit.sideHit, part.getBreakingIcon(hit), manager)
     }
 
-    def addDestroyEffects(part: TIconHitEffectsPart, manager: ParticleManager) {
+    def addDestroyEffects(part: TIconHitEffectsPart, manager: ParticleManager): Unit = {
         addDestroyEffects(part, manager, true)
     }
 
-    def addDestroyEffects(part: TIconHitEffectsPart, manager: ParticleManager, scaleDensity: Boolean) {
+    def addDestroyEffects(part: TIconHitEffectsPart, manager: ParticleManager, scaleDensity: Boolean): Unit = {
         val icons = new Array[TextureAtlasSprite](6)
         for (i <- 0 until 6)
             icons(i) = part.getBrokenIcon(i)
@@ -59,12 +59,12 @@ trait TIconHitEffectsPart extends TMultiPart {
     def getBrokenIcon(side: Int): TextureAtlasSprite
 
     @SideOnly(Side.CLIENT)
-    override def addHitEffects(hit: CuboidRayTraceResult, manager: ParticleManager) {
+    override def addHitEffects(hit: CuboidRayTraceResult, manager: ParticleManager): Unit = {
         IconHitEffects.addHitEffects(this, hit, manager)
     }
 
     @SideOnly(Side.CLIENT)
-    override def addDestroyEffects(hit: CuboidRayTraceResult, manager: ParticleManager) {
+    override def addDestroyEffects(hit: CuboidRayTraceResult, manager: ParticleManager): Unit = {
         IconHitEffects.addDestroyEffects(this, manager)
     }
 }

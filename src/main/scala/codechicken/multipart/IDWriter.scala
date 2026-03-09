@@ -6,10 +6,10 @@ import codechicken.lib.data.{MCDataInput, MCDataOutput}
  * Class for reading and writing ids, widening the carrier data type as necessary
  */
 class IDWriter {
-    var write: (MCDataOutput, Int) => Unit = _
-    var read: (MCDataInput) => Int = _
+    var write: (MCDataOutput, Int) => Unit = scala.compiletime.uninitialized
+    var read: (MCDataInput) => Int = scala.compiletime.uninitialized
 
-    def setMax(i: Int) {
+    def setMax(i: Int): Unit = {
         val l = i.toLong & 0xFFFFFFFF
         if (l > 0xFFFF) {
             write = (data, i) => data.writeInt(i)

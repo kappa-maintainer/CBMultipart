@@ -21,16 +21,16 @@ class PartialOcclusionTest(size: Int) {
     val bits = new Array[Byte](res * res * res)
     val partial = new Array[Boolean](size)
 
-    def fill(i: Int, part: TPartialOcclusionPart) {
+    def fill(i: Int, part: TPartialOcclusionPart): Unit = {
         fill(i, part.getPartialOcclusionBoxes, part.allowCompleteOcclusion)
     }
 
-    def fill(i: Int, boxes: Iterable[Cuboid6], complete: Boolean) {
+    def fill(i: Int, boxes: Iterable[Cuboid6], complete: Boolean): Unit = {
         partial(i) = !complete
         boxes.asScala.foreach(box => fill(i + 1, box))
     }
 
-    def fill(v: Int, box: Cuboid6) {
+    def fill(v: Int, box: Cuboid6): Unit = {
         for (x <- (box.min.x * res + 0.5).toInt until (box.max.x * res + 0.5).toInt)
             for (y <- (box.min.y * res + 0.5).toInt until (box.max.y * res + 0.5).toInt)
                 for (z <- (box.min.z * res + 0.5).toInt until (box.max.z * res + 0.5).toInt) {

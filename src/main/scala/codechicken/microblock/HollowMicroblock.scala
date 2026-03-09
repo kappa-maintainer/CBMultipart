@@ -62,7 +62,7 @@ object HollowMicroFactory extends CommonMicroFactory {
 trait HollowMicroblockClient extends HollowMicroblock with CommonMicroblockClient {
     renderMask |= 8 << 8
 
-    override def recalcBounds() {
+    override def recalcBounds(): Unit = {
         super.recalcBounds()
         renderMask = renderMask & 0xFF | getHollowSize << 8
     }
@@ -75,7 +75,7 @@ trait HollowMicroblockClient extends HollowMicroblock with CommonMicroblockClien
     //                BlockRenderer.renderCuboid(c, sideMask))
     //    }
 
-    override def render(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState) {
+    override def render(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState): Unit = {
         if (layer == null) {
             renderHollow(pos, ccrs, layer, getBounds, 0, false, MicroblockRender.renderCuboid)
         } else if (isTransparent) {
@@ -86,7 +86,7 @@ trait HollowMicroblockClient extends HollowMicroblock with CommonMicroblockClien
         }
     }
 
-    def renderHollow(pos: Vector3, ccrs: CCRenderState, layer: BlockRenderLayer, c: Cuboid6, sideMask: Int, face: Boolean, f: (Vector3, CCRenderState, IMicroMaterial, BlockRenderLayer, Cuboid6, Int) => Unit) {
+    def renderHollow(pos: Vector3, ccrs: CCRenderState, layer: BlockRenderLayer, c: Cuboid6, sideMask: Int, face: Boolean, f: (Vector3, CCRenderState, IMicroMaterial, BlockRenderLayer, Cuboid6, Int) => Unit): Unit = {
         val mat = getIMaterial
         val size = renderMask >> 8
         val d1 = 0.5 - size / 32D

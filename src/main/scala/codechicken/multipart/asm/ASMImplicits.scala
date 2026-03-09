@@ -16,7 +16,7 @@ object ASMImplicits {
 
     def nodeName(name: String) = if (name == null) null else name.replace('.', '/')
 
-    implicit class ExtClass(val clazz: Class[_]) extends AnyVal {
+    implicit class ExtClass(val clazz: Class[?]) extends AnyVal {
         def nodeName = ASMImplicits.nodeName(clazz.getName)
     }
 

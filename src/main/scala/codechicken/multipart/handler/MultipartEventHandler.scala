@@ -14,12 +14,12 @@ import scala.collection.JavaConverters._
 object MultipartEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    def chunkDataLoad(event:ChunkDataEvent.Load) {
+    def chunkDataLoad(event:ChunkDataEvent.Load): Unit = {
         MultipartSaveLoad.loadTiles(event.getChunk)
     }
 
     @SubscribeEvent
-    def worldUnLoad(event: WorldEvent.Unload) {
+    def worldUnLoad(event: WorldEvent.Unload): Unit = {
         MultipartSPH.onWorldUnload(event.getWorld)
         if (event.getWorld.isRemote) {
             TileCache.clear()
@@ -27,17 +27,17 @@ object MultipartEventHandler {
     }
 
     @SubscribeEvent
-    def chunkWatch(event: ChunkWatchEvent.Watch) {
+    def chunkWatch(event: ChunkWatchEvent.Watch): Unit = {
         MultipartSPH.onChunkWatch(event.getPlayer, event.getChunk)
     }
 
     @SubscribeEvent
-    def chunkUnWatch(event: ChunkWatchEvent.UnWatch) {
+    def chunkUnWatch(event: ChunkWatchEvent.UnWatch): Unit = {
         MultipartSPH.onChunkUnWatch(event.getPlayer, event.getChunk)
     }
 
     @SubscribeEvent
-    def serverTick(event: TickEvent.ServerTickEvent) {
+    def serverTick(event: TickEvent.ServerTickEvent): Unit = {
         if (event.phase == TickEvent.Phase.END) {
             MultipartSPH.onTickEnd(FMLCommonHandler.instance().getMinecraftServerInstance.getPlayerList.getPlayers.asScala.toSeq)
         }
@@ -45,7 +45,7 @@ object MultipartEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     @SideOnly(Side.CLIENT)
-    def drawBlockHighlight(event: DrawBlockHighlightEvent) {
+    def drawBlockHighlight(event: DrawBlockHighlightEvent): Unit = {
         if (event.getTarget != null && event.getTarget.typeOfHit == RayTraceResult.Type.BLOCK &&
             event.getPlayer.world.getTileEntity(event.getTarget.getBlockPos).isInstanceOf[TileMultipart]) {
             if (BlockMultipart.drawHighlight(event.getPlayer.world, event.getPlayer, event.getTarget, event.getPartialTicks)) {

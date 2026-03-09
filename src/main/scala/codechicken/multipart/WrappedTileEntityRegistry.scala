@@ -37,16 +37,16 @@ object WrappedTileEntityRegistry {
 
     private val tileRegistry = new ObfMapping("net/minecraft/tileentity/TileEntity", "field_190562_f")
 
-    val wrapped: RegistryNamespaced[ResourceLocation, Class[_ <: TileEntity]] =
-        ReflectionManager.getField(tileRegistry, null, classOf[RegistryNamespaced[ResourceLocation, Class[_ <: TileEntity]]])
+    val wrapped: RegistryNamespaced[ResourceLocation, Class[? <: TileEntity]] =
+        ReflectionManager.getField(tileRegistry, null, classOf[RegistryNamespaced[ResourceLocation, Class[? <: TileEntity]]])
     val INSTANCE = new DuplicateValueRegistry(wrapped)
 
 
-    def init() {
+    def init(): Unit = {
         ReflectionManager.setField(tileRegistry, null, INSTANCE)
     }
 
-    def registerMapping(clazz: Class[_ <: TileEntity], key: ResourceLocation) {
+    def registerMapping(clazz: Class[? <: TileEntity], key: ResourceLocation): Unit = {
         INSTANCE.addMapping(clazz, key)
     }
 }

@@ -31,7 +31,7 @@ trait IMicroMaterial extends Ordered[IMicroMaterial] {
      * Callback to load icons from the underlying block/etc
      */
     @SideOnly(Side.CLIENT)
-    def loadIcons() {}
+    def loadIcons(): Unit = {}
 
     /**
      * This function must return a list of vertex operations, one set for each
@@ -111,11 +111,11 @@ trait IMicroHighlightRenderer {
 object MicroMaterialRegistry {
     private val typeMap = MHashMap[String, IMicroMaterial]()
     private val nameMap = MHashMap[String, Int]()
-    private var idMap: Array[(String, IMicroMaterial)] = _
+    private var idMap: Array[(String, IMicroMaterial)] = scala.compiletime.uninitialized
     private val idWriter = new IDWriter
 
     private val highlightRenderers = ListBuffer[IMicroHighlightRenderer]()
-    private var maxCuttingStrength: Int = _
+    private var maxCuttingStrength: Int = scala.compiletime.uninitialized
 
     private val remap = MHashMap[String, String]()
 
@@ -124,7 +124,7 @@ object MicroMaterialRegistry {
     /**
      * Register a micro material with unique identifier name
      */
-    def registerMaterial(material: IMicroMaterial, name: String) {
+    def registerMaterial(material: IMicroMaterial, name: String): Unit = {
         if (MultiPartRegistry.loaded) {
             throw new IllegalStateException("You must register your materials in the init methods.")
         }
@@ -142,7 +142,7 @@ object MicroMaterialRegistry {
     /**
      * Replace a micro material with unique identifier name
      */
-    def replaceMaterial(material: IMicroMaterial, name: String) {
+    def replaceMaterial(material: IMicroMaterial, name: String): Unit = {
         if (MultiPartRegistry.loaded) {
             throw new IllegalStateException("You must register your materials in the init methods.")
         }
@@ -159,13 +159,13 @@ object MicroMaterialRegistry {
     /**
      * Registers a highlight renderer
      */
-    def registerHighlightRenderer(handler: IMicroHighlightRenderer) {
+    def registerHighlightRenderer(handler: IMicroHighlightRenderer): Unit = {
         highlightRenderers += handler
     }
 
     def remapName(oldName: String, newName: String): Unit = remap.put(oldName, newName)
 
-    private[microblock] def setupIDMap() {
+    private[microblock] def setupIDMap(): Unit = {
         idMap = typeMap.toList.sortBy(_._2).toArray
         idWriter.setMax(idMap.length)
         nameMap.clear()
@@ -173,7 +173,7 @@ object MicroMaterialRegistry {
             nameMap.put(idMap(i)._1, i)
     }
 
-    private[microblock] def calcMaxCuttingStrength() {
+    private[microblock] def calcMaxCuttingStrength(): Unit = {
         val it = Item.REGISTRY.iterator
         maxCuttingStrength = it.asScala.flatMap {
             case saw: Saw => Some(saw.getMaxCuttingStrength)
@@ -181,11 +181,11 @@ object MicroMaterialRegistry {
         }.max
     }
 
-    def markIconReload() {
+    def markIconReload(): Unit = {
         iconsLoaded = false
     }
 
-    private[microblock] def loadIcons() {
+    private[microblock] def loadIcons(): Unit = {
         if (!iconsLoaded) {
             if (idMap != null) {
                 idMap.foreach(e => e._2.loadIcons())
@@ -196,7 +196,7 @@ object MicroMaterialRegistry {
 
     def getMaxCuttingStrength = maxCuttingStrength
 
-    def writeIDMap(packet: PacketCustom) {
+    def writeIDMap(packet: PacketCustom): Unit = {
         packet.writeInt(idMap.length)
         idMap.foreach(e => packet.writeString(e._1))
     }
@@ -221,7 +221,7 @@ object MicroMaterialRegistry {
         missing.toSeq
     }
 
-    def writeMaterialID(data: MCDataOutput, id: Int) {
+    def writeMaterialID(data: MCDataOutput, id: Int): Unit = {
         idWriter.write(data, id)
     }
 

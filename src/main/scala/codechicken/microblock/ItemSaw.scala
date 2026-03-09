@@ -70,7 +70,7 @@ object ItemSawRenderer extends IItemRenderer {
 
     override def getTransforms: IModelState = TransformUtils.DEFAULT_BLOCK
 
-    override def renderItem(item: ItemStack, transformType: TransformType) {
+    override def renderItem(item: ItemStack, transformType: TransformType): Unit = {
         //        val t = renderType match {
         //            case INVENTORY => new TransformationList(new Scale(1.8), new Translation(0, 0, -0.6), new Rotation(-pi/4, 1, 0, 0), new Rotation(pi*3/4, 0, 1, 0))
         //            case ENTITY => new TransformationList(new Scale(1), new Translation(0, 0, -0.25), new Rotation(-pi/4, 1, 0, 0))

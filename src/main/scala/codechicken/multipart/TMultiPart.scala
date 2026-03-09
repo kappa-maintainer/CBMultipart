@@ -24,7 +24,7 @@ abstract class TMultiPart {
     /**
      * Reference to the container TileMultipart instance
      */
-    var tile: TileMultipart = _
+    var tile: TileMultipart = scala.compiletime.uninitialized
 
     /**
      * Getter for tile.worldObj
@@ -39,7 +39,7 @@ abstract class TMultiPart {
     /**
      * Called when the container tile instance is changed to update reference
      */
-    def bind(t: TileMultipart) {
+    def bind(t: TileMultipart): Unit = {
         tile = t
     }
 
@@ -53,23 +53,23 @@ abstract class TMultiPart {
      * Write all the data required to describe a client version of this part to the packet.
      * Called serverside, when a client loads this part for the first time.
      */
-    def writeDesc(packet: MCDataOutput) {}
+    def writeDesc(packet: MCDataOutput): Unit = {}
 
     /**
      * Fill out this part with the description information contained in packet. Will be exactly as written from writeDesc.
      * Called clientside when a client loads this part for the first time.
      */
-    def readDesc(packet: MCDataInput) {}
+    def readDesc(packet: MCDataInput): Unit = {}
 
     /**
      * Save part to NBT (only called serverside)
      */
-    def save(tag: NBTTagCompound) {}
+    def save(tag: NBTTagCompound): Unit = {}
 
     /**
      * Load part from NBT (only called serverside)
      */
-    def load(tag: NBTTagCompound) {}
+    def load(tag: NBTTagCompound): Unit = {}
 
     /**
      * Gets a MCDataOutput instance for writing update data to clients with this part loaded.
@@ -81,7 +81,7 @@ abstract class TMultiPart {
      * Read and operate on data written to getWriteStream. Ensure all data this part wrote is read even if it's not going to be used.
      * The default implementation assumes a call to sendDescUpdate as the only use of getWriteStream.
      */
-    def read(packet: MCDataInput) {
+    def read(packet: MCDataInput): Unit = {
         readDesc(packet)
         tile.markRender()
     }
@@ -127,7 +127,7 @@ abstract class TMultiPart {
      * @param hit    An instance of ExtendedMOP from collisionRayTrace
      * @param player The player harvesting the part
      */
-    def harvest(player: EntityPlayer, hit: CuboidRayTraceResult) {
+    def harvest(player: EntityPlayer, hit: CuboidRayTraceResult): Unit = {
         if (!player.capabilities.isCreativeMode) {
             tile.dropItems(getDrops)
         }
@@ -198,7 +198,7 @@ abstract class TMultiPart {
     /**
      * Called just before this part is actually removed from the container tile
      */
-    def preRemove() {}
+    def preRemove(): Unit = {}
 
     /**
      * Called when this part is removed from the block space
@@ -218,12 +218,12 @@ abstract class TMultiPart {
     /**
      * Called when this part separates from the world (due to removal, chunk unload or other). Use this to sync with external data structures. Called on both client and server
      */
-    def onWorldSeparate() {}
+    def onWorldSeparate(): Unit = {}
 
     /**
      * Called when this part joins the world (due to placement, chunkload or frame move etc). Use this to sync with external data structures. Called on both client and server
      */
-    def onWorldJoin() {}
+    def onWorldJoin(): Unit = {}
 
     /**
      * Called when this part is converted from a normal block/tile (only applicable if a converter has been registered)
@@ -234,7 +234,7 @@ abstract class TMultiPart {
      * Called when this part is converted from a normal block/tile (only applicable if a converter has been registered) before the original tile has been replaced
      * Use this to clear out things like inventory from the old tile.
      */
-    def invalidateConvertedTile() {}
+    def invalidateConvertedTile(): Unit = {}
 
     /**
      * Called when this part has been moved without a save/load.
@@ -259,36 +259,36 @@ abstract class TMultiPart {
      * @param hit    An instance of CuboidRayTraceResult from collisionRayTrace
      * @param item   The item held by the player
      */
-    def click(player: EntityPlayer, hit: CuboidRayTraceResult, item: ItemStack) {}
+    def click(player: EntityPlayer, hit: CuboidRayTraceResult, item: ItemStack): Unit = {}
 
     /**
      * Called when an entity is within this block space. May not actually collide with this part.
      */
-    def onEntityCollision(entity: Entity) {}
+    def onEntityCollision(entity: Entity): Unit = {}
 
     /**
      * Called when an entity is standing on this block space. May not actyally collide with this part.
      */
-    def onEntityStanding(entity: Entity) {}
+    def onEntityStanding(entity: Entity): Unit = {}
 
     /**
      * Called when a neighbor block changed
      */
     @Deprecated//Use pos sensitive version bellow, onNeighborBlockChanged.
-    def onNeighborChanged() {}
+    def onNeighborChanged(): Unit = {}
 
-    def onNeighborBlockChanged(from:BlockPos) {}
+    def onNeighborBlockChanged(from:BlockPos): Unit = {}
 
     /**
      * Called when a part is added or removed from this block space.
      * The part parameter may be null if several things have changed.
      */
-    def onPartChanged(part: TMultiPart) {}
+    def onPartChanged(part: TMultiPart): Unit = {}
 
     /**
      * Called when a scheduled tick is executed.
      */
-    def scheduledTick() {}
+    def scheduledTick(): Unit = {}
 
     /**
      * Sets a scheduledTick callback for this part ticks in the future. This is a world time value, so if the chunk is unloaded and reloaded some time later, the tick may fire immediately.
@@ -301,7 +301,7 @@ abstract class TMultiPart {
      * @param hit An instance of ExtendedMOP from collisionRayTrace
      */
     @SideOnly(Side.CLIENT)
-    def addHitEffects(hit: CuboidRayTraceResult, manager: ParticleManager) {}
+    def addHitEffects(hit: CuboidRayTraceResult, manager: ParticleManager): Unit = {}
 
     /**
      * Add particles and other effects when a player broke this part
@@ -309,7 +309,7 @@ abstract class TMultiPart {
      * @param hit An instance of ExtendedMOP from collisionRayTrace
      */
     @SideOnly(Side.CLIENT)
-    def addDestroyEffects(hit: CuboidRayTraceResult, manager: ParticleManager) {}
+    def addDestroyEffects(hit: CuboidRayTraceResult, manager: ParticleManager): Unit = {}
 
     /**
      * Render the static, unmoving faces of this part into the world renderer.
@@ -358,7 +358,7 @@ abstract class TMultiPart {
      * @param texture The current f overlay texture
      */
     @SideOnly(Side.CLIENT)
-    def renderBreaking(pos: Vector3, texture: TextureAtlasSprite, ccrs: CCRenderState) {}
+    def renderBreaking(pos: Vector3, texture: TextureAtlasSprite, ccrs: CCRenderState): Unit = {}
 
     /**
      * Override the drawing of the selection box around this part.

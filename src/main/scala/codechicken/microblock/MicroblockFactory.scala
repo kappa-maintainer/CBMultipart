@@ -10,10 +10,10 @@ import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 abstract class MicroblockFactory extends IDynamicPartFactory {
     def getName: ResourceLocation
 
-    def baseTrait: Class[_ <: Microblock]
+    def baseTrait: Class[? <: Microblock]
 
     @SideOnly(Side.CLIENT)
-    def clientTrait: Class[_ <: MicroblockClient]
+    def clientTrait: Class[? <: MicroblockClient]
 
     def getResistanceFactor: Float
 
@@ -22,7 +22,7 @@ abstract class MicroblockFactory extends IDynamicPartFactory {
     @SideOnly(Side.CLIENT)
     lazy val clientTraitId = MicroblockGenerator.registerTrait(clientTrait)
 
-    def register() {
+    def register(): Unit = {
         MultiPartRegistry.registerParts(this, Array(getName))
     }
 
@@ -37,14 +37,14 @@ abstract class MicroblockFactory extends IDynamicPartFactory {
  * Microblocks with corresponding items
  */
 abstract class CommonMicroFactory extends MicroblockFactory {
-    private var factoryID: Int = _
+    private var factoryID: Int = scala.compiletime.uninitialized
 
     def getFactoryID = factoryID
 
     def itemSlot: Int //The slot to use for rendering on an ItemStack
     def placementProperties: PlacementProperties
 
-    def register(id: Int) {
+    def register(id: Int): Unit = {
         register()
         factoryID = id
         CommonMicroFactory.registerMicroFactory(this, id)
@@ -54,7 +54,7 @@ abstract class CommonMicroFactory extends MicroblockFactory {
 object CommonMicroFactory {
     val factories = new Array[CommonMicroFactory](256)
 
-    def registerMicroFactory(factory: CommonMicroFactory, id: Int) {
+    def registerMicroFactory(factory: CommonMicroFactory, id: Int): Unit = {
         if (factories(id) != null) {
             throw new IllegalArgumentException("Microblock factory id " + id + " is already taken by " + factories(id).getName + " when adding " + factory.getName)
         }

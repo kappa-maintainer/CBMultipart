@@ -12,7 +12,7 @@ import net.minecraft.item.ItemStack
 @JEIPlugin
 class MicroblockJEIPlugin extends IModPlugin {
 
-    override def register(registry: IModRegistry) {
+    override def register(registry: IModRegistry): Unit = {
         val blacklist = registry.getJeiHelpers.getIngredientBlacklist
         if (!MicroblockProxy.showAllMicroparts) {
 
@@ -29,7 +29,7 @@ class MicroblockJEIPlugin extends IModPlugin {
         }
     }
 
-    override def registerItemSubtypes(subtypeRegistry: ISubtypeRegistry) {
+    override def registerItemSubtypes(subtypeRegistry: ISubtypeRegistry): Unit = {
         subtypeRegistry.useNbtForSubtypes(MicroblockProxy.itemMicro)
     }
 }

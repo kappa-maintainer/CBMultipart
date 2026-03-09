@@ -15,7 +15,7 @@ trait TRedstoneTile extends TileMultipart with IRedstoneTile {
      */
     override def strongPowerLevel(side: Int): Int = {
         var max = 0
-        for (p@(_p: IRedstonePart) <- partList.iterator) {
+        for (case p@(_p: IRedstonePart) <- partList.iterator) {
             val l = p.strongPowerLevel(side)
             if (l > max) max = l
         }

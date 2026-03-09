@@ -19,9 +19,9 @@ import scala.collection.mutable.{HashSet, ListBuffer}
  */
 object TickScheduler extends WorldExtensionInstantiator {
 
-    var serverDir: File = _
+    var serverDir: File = scala.compiletime.uninitialized
 
-    def onServerStarting(server: MinecraftServer) {
+    def onServerStarting(server: MinecraftServer): Unit = {
         serverDir = server.getActiveAnvilConverter.getFile(server.getFolderName, "")
     }
 
@@ -35,7 +35,7 @@ object TickScheduler extends WorldExtensionInstantiator {
         private var processing = false
         private val pending = ListBuffer[PartTickEntry]()
 
-        def scheduleTick(part: TMultiPart, ticks: Int, random: Boolean) {
+        def scheduleTick(part: TMultiPart, ticks: Int, random: Boolean): Unit = {
             if (processing) {
                 pending += new PartTickEntry(part, schedTime + ticks, random)
             } else {
@@ -43,7 +43,7 @@ object TickScheduler extends WorldExtensionInstantiator {
             }
         }
 
-        def _scheduleTick(part: TMultiPart, time: Long, random: Boolean) {
+        def _scheduleTick(part: TMultiPart, time: Long, random: Boolean): Unit = {
             if (part.tile != null) {
                 val ext = getChunkExtension(part.tile.getPos.getX >> 4, part.tile.getPos.getZ >> 4)
                 if (ext != null) {
@@ -54,11 +54,11 @@ object TickScheduler extends WorldExtensionInstantiator {
 
         def loadRandom(part: TRandomUpdateTickPart) = scheduleTick(part, nextRandomTick, true)
 
-        override def preTick() {
+        override def preTick(): Unit = {
             processing = true
         }
 
-        override def postTick() {
+        override def postTick(): Unit = {
             if (tickChunks.nonEmpty) {
                 tickChunks = tickChunks.filter(_.processTicks())
             }
@@ -79,7 +79,7 @@ object TickScheduler extends WorldExtensionInstantiator {
 
         def saveFile: File = new File(saveDir, "multipart.dat")
 
-        override def load() {
+        override def load(): Unit = {
             try {
                 val in = new FileInputStream(saveFile)
                 loadTag(CompressedStreamTools.readCompressed(in))
@@ -92,7 +92,7 @@ object TickScheduler extends WorldExtensionInstantiator {
             loadTag(new NBTTagCompound)
         }
 
-        def loadTag(tag: NBTTagCompound) {
+        def loadTag(tag: NBTTagCompound): Unit = {
             if (tag.hasKey("schedTime")) {
                 schedTime = tag.getLong("schedTime")
             } else {
@@ -106,7 +106,7 @@ object TickScheduler extends WorldExtensionInstantiator {
             return tag
         }
 
-        override def save() {
+        override def save(): Unit = {
             val file = saveFile
             if (!file.getParentFile.exists) {
                 file.getParentFile.mkdirs()
@@ -133,7 +133,7 @@ object TickScheduler extends WorldExtensionInstantiator {
 
         def schedTime = world.schedTime
 
-        def scheduleTick(part: TMultiPart, time: Long, random: Boolean) {
+        def scheduleTick(part: TMultiPart, time: Long, random: Boolean): Unit = {
             val it = tickList.iterator
             while (it.hasNext) {
                 val e = it.next()
@@ -179,7 +179,7 @@ object TickScheduler extends WorldExtensionInstantiator {
             return true
         }
 
-        override def saveData(data: NBTTagCompound) {
+        override def saveData(data: NBTTagCompound): Unit = {
             val tagList = new NBTTagList
             tickList.foreach { e =>
                 val part = e.part
@@ -196,7 +196,7 @@ object TickScheduler extends WorldExtensionInstantiator {
             }
         }
 
-        override def loadData(data: NBTTagCompound) {
+        override def loadData(data: NBTTagCompound): Unit = {
             tickList.clear()
             if (!data.hasKey("multipartTicks")) {
                 return
@@ -214,7 +214,7 @@ object TickScheduler extends WorldExtensionInstantiator {
             }
         }
 
-        override def unload() {
+        override def unload(): Unit = {
             if (!tickList.isEmpty) {
                 world.tickChunks -= this
             }
@@ -226,14 +226,14 @@ object TickScheduler extends WorldExtensionInstantiator {
     /**
      * Start random ticking for a part. Should be called from TMultiPart.onWorldJoin
      */
-    def loadRandomTick(part: TRandomUpdateTickPart) {
+    def loadRandomTick(part: TRandomUpdateTickPart): Unit = {
         getExtension(part.tile.getWorld).asInstanceOf[WorldTickScheduler].loadRandom(part)
     }
 
     /**
      * Schedule a tick for part relative to the current time.
      */
-    def scheduleTick(part: TMultiPart, ticks: Int) {
+    def scheduleTick(part: TMultiPart, ticks: Int): Unit = {
         getExtension(part.tile.getWorld).asInstanceOf[WorldTickScheduler].scheduleTick(part, ticks, false)
     }
 

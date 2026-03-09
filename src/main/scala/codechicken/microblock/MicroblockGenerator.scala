@@ -5,7 +5,7 @@ import java.util.{BitSet => JBitSet}
 import codechicken.multipart.asm.{ASMMixinFactory, ScratchBitSet}
 
 trait IGeneratedMaterial {
-    def addTraits(traits: JBitSet, mcrFactory: MicroblockFactory, client: Boolean)
+    def addTraits(traits: JBitSet, mcrFactory: MicroblockFactory, client: Boolean): Unit 
 }
 
 object MicroblockGenerator extends ASMMixinFactory(classOf[Microblock], classOf[Int]) with ScratchBitSet {

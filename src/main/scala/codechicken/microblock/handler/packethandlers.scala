@@ -15,13 +15,13 @@ class MicroblockPH {
 }
 
 object MicroblockCPH extends MicroblockPH with IClientPacketHandler {
-    def handlePacket(packet: PacketCustom, mc: Minecraft, netHandler: INetHandlerPlayClient) {
+    def handlePacket(packet: PacketCustom, mc: Minecraft, netHandler: INetHandlerPlayClient): Unit = {
         packet.getType match {
             case 1 => handleMaterialRegistration(packet, netHandler)
         }
     }
 
-    def handleMaterialRegistration(packet: PacketCustom, netHandler: INetHandlerPlayClient) {
+    def handleMaterialRegistration(packet: PacketCustom, netHandler: INetHandlerPlayClient): Unit = {
         val missing = MicroMaterialRegistry.readIDMap(packet)
         if (!missing.isEmpty) {
             netHandler.handleDisconnect(new SPacketDisconnect(new TextComponentString("microblock.missing" + missing.mkString(", "))))
@@ -30,10 +30,10 @@ object MicroblockCPH extends MicroblockPH with IClientPacketHandler {
 }
 
 object MicroblockSPH extends MicroblockPH with IServerPacketHandler with IHandshakeHandler {
-    def handlePacket(packet: PacketCustom, sender: EntityPlayerMP, netHandler: INetHandlerPlayServer) {}
+    def handlePacket(packet: PacketCustom, sender: EntityPlayerMP, netHandler: INetHandlerPlayServer): Unit = {}
 
 
-    override def handshakeReceived(netHandler: NetHandlerPlayServer) {
+    override def handshakeReceived(netHandler: NetHandlerPlayServer): Unit = {
         val packet = new PacketCustom(registryChannel, 1)
         MicroMaterialRegistry.writeIDMap(packet)
         netHandler.sendPacket(packet.toPacket)

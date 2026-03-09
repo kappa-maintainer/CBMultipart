@@ -13,13 +13,13 @@ import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 object MicroblockEventHandler {
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
-    def postTextureStitch(event: TextureStitchEvent.Post) {
+    def postTextureStitch(event: TextureStitchEvent.Post): Unit = {
         MicroMaterialRegistry.markIconReload()
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     @SideOnly(Side.CLIENT)
-    def drawBlockHighlight(event: DrawBlockHighlightEvent) {
+    def drawBlockHighlight(event: DrawBlockHighlightEvent): Unit = {
         val currentItem = event.getPlayer.getHeldItemMainhand
 
         if (!currentItem.isEmpty && currentItem.getItem == MicroblockProxy.itemMicro &&
@@ -34,7 +34,7 @@ object MicroblockEventHandler {
     }
 
     @SubscribeEvent
-    def registerRecipes(event: RegistryEvent.Register[IRecipe]) {
+    def registerRecipes(event: RegistryEvent.Register[IRecipe]): Unit = {
         MicroblockProxy.registerRecipes(event.getRegistry)
     }
 }

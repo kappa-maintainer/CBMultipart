@@ -41,7 +41,7 @@ object ControlKeyHandler extends KeyBinding("key.control", Keyboard.KEY_LCONTROL
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
-    def tick(event: ClientTickEvent) {
+    def tick(event: ClientTickEvent): Unit = {
         val pressed = isKeyDown
         if (pressed != wasPressed) {
             wasPressed = pressed

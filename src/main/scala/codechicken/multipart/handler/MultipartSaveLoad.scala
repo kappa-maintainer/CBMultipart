@@ -47,9 +47,9 @@ object MultipartSaveLoad {
         var loaded = false
         //The NBT of the tile.
         //We save this back out in case something breaks.
-        var tag: NBTTagCompound = _
+        var tag: NBTTagCompound = scala.compiletime.uninitialized
 
-        override def readFromNBT(t: NBTTagCompound) {
+        override def readFromNBT(t: NBTTagCompound): Unit = {
             super.readFromNBT(t)
             if (t != null) {
                 tag = t.copy()
@@ -63,7 +63,7 @@ object MultipartSaveLoad {
             super.writeToNBT(compound)
         }
 
-        override def update() {
+        override def update(): Unit = {
             if (!failed && !loaded) {
                 if (tag != null) {
                     val newTile = TileMultipart.createFromNBT(tag)
@@ -92,16 +92,16 @@ object MultipartSaveLoad {
         override def shouldRefresh(world: World, pos: BlockPos, oldState: IBlockState, newState: IBlockState) = oldState.getBlock != newState.getBlock
     }
 
-    def load() {
+    def load(): Unit = {
         GameRegistry.registerTileEntity(classOf[TileNBTContainer], TILE_ID.toString)
     }
 
-    def registerTileClass(t: Class[_ <: TileEntity]) {
+    def registerTileClass(t: Class[? <: TileEntity]): Unit = {
         WrappedTileEntityRegistry.registerMapping(t, TILE_ID)
     }
 
     //Handle remapping tiles on chunk load.
-    def loadTiles(chunk: Chunk) {
+    def loadTiles(chunk: Chunk): Unit = {
         val iterator = chunk.getTileEntityMap.entrySet().iterator()
         while (iterator.hasNext) {
             val t = iterator.next()

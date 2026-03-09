@@ -19,7 +19,7 @@ object ItemPlacementHelper {
     private val placing = new ThreadLocal[Any]
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    def playerInteract(event: PlayerInteractEvent.RightClickBlock) {
+    def playerInteract(event: PlayerInteractEvent.RightClickBlock): Unit = {
         if (event.getWorld.isRemote) {
             if (placing.get() != null) {
                 return

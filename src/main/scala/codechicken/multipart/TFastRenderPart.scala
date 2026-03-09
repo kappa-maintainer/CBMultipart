@@ -55,6 +55,6 @@ trait TFastRenderPart extends TMultiPart with TTESRPart {
      * @param frameDelta The partial interpolation frame value for animations between ticks
      */
     @SideOnly(Side.CLIENT)
-    def renderFast(ccrs:CCRenderState, pos:Vector3, pass:Int, frameDelta:Float){}
+    def renderFast(ccrs:CCRenderState, pos:Vector3, pass:Int, frameDelta:Float): Unit ={}
 
 }

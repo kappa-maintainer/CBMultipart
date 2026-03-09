@@ -14,7 +14,7 @@ import org.objectweb.asm.{FieldVisitor, Label, MethodVisitor}
 import scala.collection.JavaConverters._
 
 object MultipartMixinFactory extends ASMMixinFactory(classOf[TileMultipart]) {
-    override protected def autoCompleteJavaTrait(cnode: ClassNode) {
+    override protected def autoCompleteJavaTrait(cnode: ClassNode): Unit = {
         if (!cnode.fields.isEmpty && findMethod(new ObfMapping(cnode.name, "copyFrom", "(Lcodechicken/multipart/TileMultipart;)V"), cnode) == null) {
             val mv = cnode.visitMethod(ACC_PUBLIC, "copyFrom", "(Lcodechicken/multipart/TileMultipart;)V", null, null)
             mv.visitVarInsn(ALOAD, 0)
@@ -154,8 +154,8 @@ object MultipartMixinFactory extends ASMMixinFactory(classOf[TileMultipart]) {
             }
         }
 
-        def generatePassThroughMethod(m: MethodNode) {
-            mv = cw.visitMethod(ACC_PUBLIC, m.name, m.desc, m.signature, Array(m.exceptions.asScala.toSeq: _*))
+        def generatePassThroughMethod(m: MethodNode): Unit = {
+            mv = cw.visitMethod(ACC_PUBLIC, m.name, m.desc, m.signature, Array(m.exceptions.asScala.toSeq*))
             mv.visitVarInsn(ALOAD, 0)
             mv.visitFieldInsn(GETFIELD, tname, vname, idesc)
             finishBridgeCall(mv, m.desc, INVOKEINTERFACE, iname, m.name, m.desc)
@@ -169,6 +169,6 @@ object MultipartMixinFactory extends ASMMixinFactory(classOf[TileMultipart]) {
         return tname
     }
 
-    override protected def onCompiled(clazz: Class[_ <: TileMultipart], traitSet: BitSet) =
+    override protected def onCompiled(clazz: Class[? <: TileMultipart], traitSet: BitSet) =
         MultipartGenerator.registerTileClass(clazz, traitSet)
 }

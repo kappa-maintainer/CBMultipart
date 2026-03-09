@@ -97,7 +97,7 @@ class BlockMultipart extends Block(Material.ROCK) {
             case tile => tile.partList.isEmpty
         }
 
-    override def addCollisionBoxToList(state: IBlockState, world: World, pos: BlockPos, entityBox: AxisAlignedBB, collidingBoxes: JList[AxisAlignedBB], entity: Entity, flag: Boolean) {
+    override def addCollisionBoxToList(state: IBlockState, world: World, pos: BlockPos, entityBox: AxisAlignedBB, collidingBoxes: JList[AxisAlignedBB], entity: Entity, flag: Boolean): Unit = {
         getTile(world, pos) match {
             case null =>
             case tile => tile.addCollisionBoxToList(entityBox, collidingBoxes)
@@ -166,7 +166,7 @@ class BlockMultipart extends Block(Material.ROCK) {
         world.getTileEntity(pos) == null
     }
 
-    def dropAndDestroy(world: World, pos: BlockPos, state: IBlockState) {
+    def dropAndDestroy(world: World, pos: BlockPos, state: IBlockState): Unit = {
         val tile = getTile(world, pos)
         if (tile != null && !world.isRemote) {
             tile.dropItems(getDrops(world, pos, state, 0))
@@ -195,28 +195,28 @@ class BlockMultipart extends Block(Material.ROCK) {
             case _ => false
         }
 
-    override def onBlockClicked(world: World, pos: BlockPos, player: EntityPlayer) {
+    override def onBlockClicked(world: World, pos: BlockPos, player: EntityPlayer): Unit = {
         (getTile(world, pos), retracePart(world, pos, player)) match {
             case (tile: TileMultipart, hit: PartRayTraceResult) => tile.onBlockClicked(player, hit)
             case _ =>
         }
     }
 
-    override def onEntityCollision(world: World, pos: BlockPos, state: IBlockState, entity: Entity) {
+    override def onEntityCollision(world: World, pos: BlockPos, state: IBlockState, entity: Entity): Unit = {
         getTile(world, pos) match {
             case null =>
             case tile => tile.onEntityCollision(entity)
         }
     }
 
-    override def onEntityWalk(world: World, pos: BlockPos, entity: Entity) {
+    override def onEntityWalk(world: World, pos: BlockPos, entity: Entity): Unit = {
         getTile(world, pos) match {
             case null =>
             case tile => tile.onEntityStanding(entity)
         }
     }
 
-    override def neighborChanged(state: IBlockState, world: World, pos: BlockPos, neighborBlock: Block, fromPos: BlockPos) {
+    override def neighborChanged(state: IBlockState, world: World, pos: BlockPos, neighborBlock: Block, fromPos: BlockPos): Unit = {
         getTile(world, pos) match {
             case null =>
             case tile =>
@@ -225,7 +225,7 @@ class BlockMultipart extends Block(Material.ROCK) {
         }
     }
 
-    override def onNeighborChange(world: IBlockAccess, pos: BlockPos, neighbor: BlockPos) {
+    override def onNeighborChange(world: IBlockAccess, pos: BlockPos, neighbor: BlockPos): Unit = {
         getTile(world, pos) match {
             case null =>
             case tile => tile.onNeighborTileChange(neighbor)
@@ -264,7 +264,7 @@ class BlockMultipart extends Block(Material.ROCK) {
     override def canRenderInLayer(state: IBlockState, layer: BlockRenderLayer) = true
 
     @SideOnly(Side.CLIENT)
-    override def randomDisplayTick(state: IBlockState, world: World, pos: BlockPos, rand: Random) {
+    override def randomDisplayTick(state: IBlockState, world: World, pos: BlockPos, rand: Random): Unit = {
         getClientTile(world, pos) match {
             case null =>
             case tile => tile.randomDisplayTick(rand)

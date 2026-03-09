@@ -12,5 +12,5 @@ trait INeighborTileChangePart {
     /**
      * Callback for neighbor tile changes, from same function in Block
      */
-    def onNeighborTileChanged(side: Int, weak: Boolean)
+    def onNeighborTileChanged(side: Int, weak: Boolean): Unit 
 }

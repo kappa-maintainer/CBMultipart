@@ -46,7 +46,7 @@ object FaceMicroFactory extends CommonMicroFactory {
 }
 
 trait FaceMicroblockClient extends CommonMicroblockClient {
-    override def render(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState) {
+    override def render(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState): Unit = {
         if (layer == null) {
             MicroblockRender.renderCuboid(pos, ccrs, getIMaterial, layer, getBounds, 0)
         } else if (isTransparent) {

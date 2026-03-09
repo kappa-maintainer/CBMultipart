@@ -29,8 +29,8 @@ import scala.collection.mutable.{ListBuffer, Map => MMap}
 object MultiPartRegistry {
     private val nameToFactory = MMap[ResourceLocation, IDynamicPartFactory]()
     private val nameToID = MMap[ResourceLocation, Int]()
-    private var idToFactory: Array[IDynamicPartFactory] = _
-    private var idToName: Array[ResourceLocation] = _
+    private var idToFactory: Array[IDynamicPartFactory] = scala.compiletime.uninitialized
+    private var idToName: Array[ResourceLocation] = scala.compiletime.uninitialized
     private val idWriter = new IDWriter
     private val converters = new util.HashSet[IPartConverter]()
     private val placementConverters = new util.HashSet[IPlacementConverter]()
@@ -48,18 +48,18 @@ object MultiPartRegistry {
     /**
      * Registers an IPartFactory for an array of types it is capable of instantiating. Must be called before postInit
      */
-    def registerParts(partFactory: IPartFactory, types: collection.Iterable[ResourceLocation]) {
-        registerParts(partFactory.createPart _, types)
+    def registerParts(partFactory: IPartFactory, types: collection.Iterable[ResourceLocation]): Unit = {
+        registerParts(partFactory.createPart, types)
     }
 
-    def registerParts(partFactory: IPartFactory, types: Iterable[ResourceLocation]) {
-        registerParts(partFactory.createPart _, types.asScala)
+    def registerParts(partFactory: IPartFactory, types: Iterable[ResourceLocation]): Unit = {
+        registerParts(partFactory.createPart, types.asScala)
     }
 
     /**
      * Scala functional version of registerParts. Must be called before postInit
      */
-    def registerParts(partFactory: (ResourceLocation, Boolean) => TMultiPart, types: collection.Iterable[ResourceLocation]) {
+    def registerParts(partFactory: (ResourceLocation, Boolean) => TMultiPart, types: collection.Iterable[ResourceLocation]): Unit = {
         registerParts(new IDynamicPartFactory {
             override def createPartServer(name: ResourceLocation, tag: NBTTagCompound) = partFactory(name, false)
 
@@ -67,14 +67,14 @@ object MultiPartRegistry {
         }, types)
     }
 
-    def registerParts(partFactory: (ResourceLocation, Boolean) => TMultiPart, types: Iterable[ResourceLocation]) {
+    def registerParts(partFactory: (ResourceLocation, Boolean) => TMultiPart, types: Iterable[ResourceLocation]): Unit = {
         registerParts(partFactory, types.asScala)
     }
 
     /**
      * Registers an IDynamicPartFactory with an array of types it is capable of instantiating. Must be called before postInit
      */
-    def registerParts(partFactory: IDynamicPartFactory, types: collection.Iterable[ResourceLocation]) {
+    def registerParts(partFactory: IDynamicPartFactory, types: collection.Iterable[ResourceLocation]): Unit = {
         if (loaded) {
             throw new IllegalStateException("Parts must be registered in the init methods.")
         }
@@ -94,22 +94,22 @@ object MultiPartRegistry {
         }
     }
 
-    def registerParts(partFactory: IDynamicPartFactory, types: Iterable[ResourceLocation]) {
+    def registerParts(partFactory: IDynamicPartFactory, types: Iterable[ResourceLocation]): Unit = {
         registerParts(partFactory, types.asScala)
     }
 
     /**
      * Register a part converter instance
      */
-    def registerConverter(c: IPartConverter) {
+    def registerConverter(c: IPartConverter): Unit = {
         converters.add(c)
     }
 
-    def registerPlacementConverter(c:IPlacementConverter) {
+    def registerPlacementConverter(c:IPlacementConverter): Unit = {
         placementConverters.add(c)
     }
 
-    private[multipart] def beforeServerStart() {
+    private[multipart] def beforeServerStart(): Unit = {
         val (a1, a2) = nameToFactory.toArray.sortBy(_._1).unzip
         idToName = a1
         idToFactory = a2
@@ -119,7 +119,7 @@ object MultiPartRegistry {
             nameToID.put(name, id)
     }
 
-    private[multipart] def writeIDMap(packet: PacketCustom) {
+    private[multipart] def writeIDMap(packet: PacketCustom): Unit = {
         packet.writeInt(idToName.length)
         idToName.foreach(packet.writeResourceLocation)
     }
@@ -150,7 +150,7 @@ object MultiPartRegistry {
      */
     private[multipart] def required = state > 0
 
-    private[multipart] def postInit() {
+    private[multipart] def postInit(): Unit = {
         state = 2
     }
 
@@ -159,7 +159,7 @@ object MultiPartRegistry {
     /**
      * Writes the id of part to data
      */
-    def writePartID(data: MCDataOutput, part: TMultiPart) {
+    def writePartID(data: MCDataOutput, part: TMultiPart): Unit = {
         idWriter.write(data, nameToID(part.getType))
     }
 
@@ -220,7 +220,7 @@ object MultiPartRegistryClient {
      * Optionally register a custom state mapper for this part. If you dont register
      * a custom mapper, a default vanilla mapper will be used.
      */
-    def registerCustomStateMapper(part: IModelRenderPart, mapper: IMultipartStateMapper) {
+    def registerCustomStateMapper(part: IModelRenderPart, mapper: IMultipartStateMapper): Unit = {
         getModelPartContainer(part) //register right away so it can be mapped
         nameToModelMapper += (part.getType -> mapper)
     }

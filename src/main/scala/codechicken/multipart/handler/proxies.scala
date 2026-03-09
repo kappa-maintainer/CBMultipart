@@ -23,11 +23,11 @@ import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import org.apache.logging.log4j.{LogManager, Logger}
 
 class MultipartProxy_serverImpl {
-    var block: BlockMultipart = _
-    var config: ConfigFile = _
+    var block: BlockMultipart = scala.compiletime.uninitialized
+    var config: ConfigFile = scala.compiletime.uninitialized
     var logger: Logger = LogManager.getLogger("ForgeMultiPartCBE")
 
-    def preInit(cfgdir: File) {
+    def preInit(cfgdir: File): Unit = {
         config = new ConfigFile(new File(cfgdir, "multipart.cfg"))
             .setComment("Multipart API config file")
 
@@ -51,9 +51,9 @@ class MultipartProxy_serverImpl {
         MultipartSaveLoad.load()
     }
 
-    def init() {}
+    def init(): Unit = {}
 
-    def postInit() {
+    def postInit(): Unit = {
         MinecraftForge.EVENT_BUS.register(MultipartEventHandler)
         MinecraftForge.EVENT_BUS.register(ItemPlacementHelper)
         PacketCustom.assignHandler(MultipartSPH.channel, MultipartSPH)
@@ -65,28 +65,28 @@ class MultipartProxy_serverImpl {
         MultipartCompatiblity.load()
     }
 
-    def onTileClassBuilt(t: Class[_ <: TileEntity]) {
+    def onTileClassBuilt(t: Class[? <: TileEntity]): Unit = {
         MultipartSaveLoad.registerTileClass(t)
     }
 }
 
 class MultipartProxy_clientImpl extends MultipartProxy_serverImpl {
     @SideOnly(Side.CLIENT)
-    override def preInit(cfgdir: File) {
+    override def preInit(cfgdir: File): Unit = {
         super.preInit(cfgdir)
 
         ModelLoader.setCustomStateMapper(block, MultipartStateMapper)
     }
 
     @SideOnly(Side.CLIENT)
-    override def init() {
+    override def init(): Unit = {
         super.init()
 
         MinecraftForge.EVENT_BUS.register(this)
     }
 
     @SideOnly(Side.CLIENT)
-    override def postInit() {
+    override def postInit(): Unit = {
         super.postInit()
 
         PacketCustom.assignHandler(MultipartCPH.channel, MultipartCPH)
@@ -99,7 +99,7 @@ class MultipartProxy_clientImpl extends MultipartProxy_serverImpl {
     }
 
     @SideOnly(Side.CLIENT)
-    override def onTileClassBuilt(t: Class[_ <: TileEntity]) {
+    override def onTileClassBuilt(t: Class[? <: TileEntity]): Unit = {
         super.onTileClassBuilt(t)
         if(classOf[TTESRRenderTile].isAssignableFrom(t)) {
             ClientRegistry.bindTileEntitySpecialRenderer(t.asInstanceOf[Class[TileEntity]], MultipartRenderer.asInstanceOf[TileEntitySpecialRenderer[TileEntity]])
@@ -108,7 +108,7 @@ class MultipartProxy_clientImpl extends MultipartProxy_serverImpl {
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
-    def onModelBakeEvent(event: ModelBakeEvent) {
+    def onModelBakeEvent(event: ModelBakeEvent): Unit = {
         //        event.getModelRegistry.putObject(
         //            new ModelResourceLocation(block.getRegistryName.toString),
         //            MultipartTileModel

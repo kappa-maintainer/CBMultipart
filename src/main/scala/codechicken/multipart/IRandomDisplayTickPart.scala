@@ -11,5 +11,5 @@ trait IRandomDisplayTickPart {
     /**
      * Called on a random display tick.
      */
-    def randomDisplayTick(random: Random)
+    def randomDisplayTick(random: Random): Unit 
 }

@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler
 object MultipartCompatiblity {
     var canAddPart = (world: World, pos: BlockPos) => true
 
-    def load() {
+    def load(): Unit = {
         if (FMLCommonHandler.instance().getModName.contains("mcpc")) {
             MCPCCompatModule.load()
         }
@@ -15,7 +15,7 @@ object MultipartCompatiblity {
 }
 
 object MCPCCompatModule {
-    def load() {
+    def load(): Unit = {
         try {
             //            val m_canPlacePart = classOf[World].getDeclaredMethod("canPlaceMultipart", classOf[Block], classOf[Int], classOf[Int], classOf[Int])
             //            MultipartCompatiblity.canAddPart = (world:World, x:Int, y:Int, z:Int) => {

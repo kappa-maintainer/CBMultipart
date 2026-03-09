@@ -37,7 +37,7 @@ object DebugPrinter {
             file.delete
     }
 
-    def dump(name: String, bytes: Array[Byte]) {
+    def dump(name: String, bytes: Array[Byte]): Unit = {
         val fName = name.replace('/', '#')
         if(ModularASMTransformer.DUMP_RAW) {
             val file = ResourceUtils.ensureExists(new File(dir, fName + ".class"))
@@ -50,7 +50,7 @@ object DebugPrinter {
         }
     }
 
-    def defined(name: String, bytes: Array[Byte]) {
+    def defined(name: String, bytes: Array[Byte]): Unit = {
         if ((permGenUsed + bytes.length) / 16000 != permGenUsed / 16000) {
             logger.debug((permGenUsed + bytes.length) + " bytes of permGen has been used by ASMMixinCompiler")
         }
@@ -76,7 +76,7 @@ object ASMMixinCompiler {
         DebugPrinter.defined(name, bytes)
 
         try {
-            m_defineClass.invoke(cl, bytes, 0: Integer, bytes.length: Integer).asInstanceOf[Class[_]]
+            m_defineClass.invoke(cl, bytes, 0: Integer, bytes.length: Integer).asInstanceOf[Class[?]]
         } catch {
             case link: LinkageError if link.getMessage.contains("duplicate") =>
                 throw new IllegalStateException("class with name: " + name + " already loaded. Do not reference your java mixin classes before registering", link)
@@ -103,7 +103,7 @@ object ASMMixinCompiler {
         bytes
     }
 
-    def internalDefine(name$: String, bytes: Array[Byte]) {
+    def internalDefine(name$: String, bytes: Array[Byte]): Unit = {
         val name = nodeName(name$)
         traitByteMap.put(name, bytes)
         remClassInfo(name)
@@ -185,11 +185,11 @@ object ASMMixinCompiler {
 
     implicit def getClassInfo(cnode: ClassNode): ClassInfo = getClassInfo(cnode.name)
 
-    implicit def getClassInfo(clazz: Class[_]): ClassInfo = if (clazz == null) null else getClassInfo(clazz.nodeName)
+    implicit def getClassInfo(clazz: Class[?]): ClassInfo = if (clazz == null) null else getClassInfo(clazz.nodeName)
 
     object ClassInfo {
 
-        class ReflectionClassInfo(clazz: Class[_]) extends ClassInfo {
+        class ReflectionClassInfo(clazz: Class[?]) extends ClassInfo {
 
             case class ReflectionMethodInfo(method: Method) extends MethodInfo {
                 def owner = ReflectionClassInfo.this
@@ -223,7 +223,7 @@ object ASMMixinCompiler {
 
                 def desc = mnode.desc
 
-                def exceptions = Array(mnode.exceptions.asScala.toSeq: _*)
+                def exceptions = Array(mnode.exceptions.asScala.toSeq*)
 
                 def isPrivate = (mnode.access & ACC_PRIVATE) != 0
 
@@ -286,7 +286,7 @@ object ASMMixinCompiler {
 
     import StackAnalyser.width
 
-    def finishBridgeCall(mv: MethodVisitor, mvdesc: String, opcode: Int, owner: String, name: String, desc: String) {
+    def finishBridgeCall(mv: MethodVisitor, mvdesc: String, opcode: Int, owner: String, name: String, desc: String): Unit = {
         val args = getArgumentTypes(mvdesc)
         val ret = getReturnType(mvdesc)
         var localIndex = 1
@@ -300,7 +300,7 @@ object ASMMixinCompiler {
         mv.visitMaxs(Math.max(width(args) + 1, width(ret)), width(args) + 1)
     }
 
-    def writeBridge(mv: MethodVisitor, mvdesc: String, opcode: Int, owner: String, name: String, desc: String) {
+    def writeBridge(mv: MethodVisitor, mvdesc: String, opcode: Int, owner: String, name: String, desc: String): Unit = {
         mv.visitVarInsn(ALOAD, 0)
         finishBridgeCall(mv, mvdesc, opcode, owner, name, desc)
     }
@@ -308,7 +308,7 @@ object ASMMixinCompiler {
     def writeStaticBridge(mv: MethodNode, mname: String, t: MixinInfo) =
         writeBridge(mv, mv.desc, INVOKESTATIC, t.tname, mname, staticDesc(t.name, mv.desc))
 
-    def mixinClasses(name: String, superClass: String, traits: Seq[String]): Class[_] = {
+    def mixinClasses(name: String, superClass: String, traits: Seq[String]): Class[?] = {
         if (traits.isEmpty) {
             return cl.findClass(superClass.name.replace('/', '.'))
         }
@@ -371,7 +371,7 @@ object ASMMixinCompiler {
         mixinInfos.reverse.foreach { t => //last trait gets first pick on methods
             t.methods.foreach { m =>
                 if (!methodSigs(m.name + m.desc)) {
-                    val mv = cnode.visitMethod(ACC_PUBLIC, m.name, m.desc, null, Array(m.exceptions.asScala.toSeq: _*)).asInstanceOf[MethodNode]
+                    val mv = cnode.visitMethod(ACC_PUBLIC, m.name, m.desc, null, Array(m.exceptions.asScala.toSeq*)).asInstanceOf[MethodNode]
                     writeStaticBridge(mv, m.name, t)
                     methodSigs += m.name + m.desc
                 }
@@ -411,7 +411,7 @@ object ASMMixinCompiler {
 
     def staticDesc(owner: String, desc: String) = {
         val descT = getMethodType(desc)
-        getMethodDescriptor(descT.getReturnType, getType("L" + owner + ";") +: descT.getArgumentTypes: _*)
+        getMethodDescriptor(descT.getReturnType, getType("L" + owner + ";") +: descT.getArgumentTypes*)
     }
 
     def getSuper(minsn: MethodInsnNode, stack: StackAnalyser): Option[MethodInfo] = {
@@ -440,7 +440,7 @@ object ASMMixinCompiler {
             registerScalaTrait(i.cnode)
     }
 
-    def registerJavaTrait(cnode: ClassNode) {
+    def registerJavaTrait(cnode: ClassNode): Unit = {
         if ((cnode.access & ACC_INTERFACE) != 0) {
             throw new IllegalArgumentException("Cannot register java interface " + cnode.name + " as a mixin trait. Try register passThroughInterface")
         }
@@ -472,7 +472,7 @@ object ASMMixinCompiler {
         inode.sourceFile = cnode.sourceFile
 
         val tnode = new ClassNode() //trait node (interface)
-        tnode.visit(V1_6, ACC_INTERFACE | ACC_ABSTRACT | ACC_PUBLIC, cnode.name, null, "java/lang/Object", Array(cnode.interfaces.asScala.toSeq: _*))
+        tnode.visit(V1_6, ACC_INTERFACE | ACC_ABSTRACT | ACC_PUBLIC, cnode.name, null, "java/lang/Object", Array(cnode.interfaces.asScala.toSeq*))
 
         def fname(name: String) = fields(name).accessName(cnode.name)
 
@@ -493,17 +493,17 @@ object ASMMixinCompiler {
         def staticClone(mnode: MethodNode, name: String, access: Int) = {
             val mv = inode.visitMethod(access | ACC_STATIC, name,
                 staticDesc(cnode.name, mnode.desc),
-                null, Array(mnode.exceptions.asScala.toSeq: _*)).asInstanceOf[MethodNode]
+                null, Array(mnode.exceptions.asScala.toSeq*)).asInstanceOf[MethodNode]
             copy(mnode, mv)
             mv
         }
 
-        def staticTransform(mnode: MethodNode, base: MethodNode) {
+        def staticTransform(mnode: MethodNode, base: MethodNode): Unit = {
             val stack = new StackAnalyser(getType(cnode.name), base)
             val insnList = mnode.instructions
             var insn = insnList.getFirst
 
-            def replace(newinsn: AbstractInsnNode) {
+            def replace(newinsn: AbstractInsnNode): Unit = {
                 insnList.insert(insn, newinsn)
                 insnList.remove(insn)
                 insn = newinsn
@@ -546,7 +546,7 @@ object ASMMixinCompiler {
             }
         }
 
-        def convertMethod(mnode: MethodNode) {
+        def convertMethod(mnode: MethodNode): Unit = {
             if (mnode.name == "<clinit>") {
                 throw new IllegalArgumentException("Static initialisers are not permitted " + cnode.name + " as a mixin trait")
             }
@@ -558,7 +558,7 @@ object ASMMixinCompiler {
 
                 val mv = staticClone(mnode, "$init$", ACC_PUBLIC)
 
-                def removeSuperConstructor() {
+                def removeSuperConstructor(): Unit = {
                     val insns = new InsnListSection
                     insns.add(new VarInsnNode(ALOAD, 0))
                     insns.add(new MethodInsnNode(INVOKESPECIAL, cnode.superName, "<init>", "()V", false))
@@ -577,7 +577,7 @@ object ASMMixinCompiler {
             }
 
             if ((mnode.access & ACC_PRIVATE) == 0) {
-                val mv = tnode.visitMethod(ACC_PUBLIC | ACC_ABSTRACT, mnode.name, mnode.desc, null, Array(mnode.exceptions.asScala.toSeq: _*))
+                val mv = tnode.visitMethod(ACC_PUBLIC | ACC_ABSTRACT, mnode.name, mnode.desc, null, Array(mnode.exceptions.asScala.toSeq*))
                 methods += mv.asInstanceOf[MethodNode]
             }
 

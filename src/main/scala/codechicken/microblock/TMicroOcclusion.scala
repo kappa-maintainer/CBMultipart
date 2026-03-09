@@ -166,25 +166,25 @@ trait JMicroShrinkRender {
 }
 
 trait TMicroOcclusionClient extends TMicroOcclusion with JMicroShrinkRender {
-    var renderBounds: Cuboid6 = _
-    var renderMask: Int = _
+    var renderBounds: Cuboid6 = scala.compiletime.uninitialized
+    var renderMask: Int = scala.compiletime.uninitialized
 
-    override def onPartChanged(part: TMultiPart) {
+    override def onPartChanged(part: TMultiPart): Unit = {
         super.onPartChanged(part)
         recalcBounds()
     }
 
-    override def onAdded() {
+    override def onAdded(): Unit = {
         super.onAdded()
         recalcBounds()
     }
 
-    override def read(packet: MCDataInput) {
+    override def read(packet: MCDataInput): Unit = {
         super.read(packet)
         recalcBounds()
     }
 
-    def recalcBounds() {
+    def recalcBounds(): Unit = {
         renderBounds = getBounds.copy
         renderMask = MicroOcclusion.recalcBounds(this, renderBounds)
     }

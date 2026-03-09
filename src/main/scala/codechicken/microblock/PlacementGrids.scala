@@ -8,7 +8,7 @@ import org.lwjgl.opengl.GL11._
 trait PlacementGrid {
     def getHitSlot(vhit: Vector3, side: Int): Int
 
-    def render(hit: Vector3, side: Int) {
+    def render(hit: Vector3, side: Int): Unit = {
         glTransformFace(hit, side)
         glLineWidth(2)
         glColor4f(0, 0, 0, 1)
@@ -18,9 +18,9 @@ trait PlacementGrid {
         glPopMatrix()
     }
 
-    def drawLines() {}
+    def drawLines(): Unit = {}
 
-    def glTransformFace(hit: Vector3, side: Int) {
+    def glTransformFace(hit: Vector3, side: Int): Unit = {
         val pos = hit.copy.floor()
         glPushMatrix()
         glTranslated(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5)
@@ -31,7 +31,7 @@ trait PlacementGrid {
 }
 
 class FaceEdgeGrid(size: Double) extends PlacementGrid {
-    override def drawLines() {
+    override def drawLines(): Unit = {
         glVertex3d(-0.5, 0, -0.5)
         glVertex3d(-0.5, 0, 0.5)
 
@@ -86,7 +86,7 @@ class FaceEdgeGrid(size: Double) extends PlacementGrid {
 object FacePlacementGrid extends FaceEdgeGrid(1 / 4D)
 
 object CornerPlacementGrid extends PlacementGrid {
-    override def drawLines() {
+    override def drawLines(): Unit = {
         glVertex3d(-0.5, 0, -0.5)
         glVertex3d(-0.5, 0, 0.5)
 
@@ -124,7 +124,7 @@ object CornerPlacementGrid extends PlacementGrid {
 }
 
 object EdgePlacementGrid extends PlacementGrid {
-    override def drawLines() {
+    override def drawLines(): Unit = {
         glVertex3d(-0.5, 0, -0.5)
         glVertex3d(-0.5, 0, 0.5)
 

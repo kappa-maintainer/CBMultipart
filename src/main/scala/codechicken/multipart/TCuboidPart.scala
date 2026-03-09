@@ -25,7 +25,7 @@ trait TCuboidPart extends TMultiPart {
 
     override def getCollisionBoxes: Iterable[Cuboid6] = Seq(getBounds).asJava
 
-    override def renderBreaking(pos: Vector3, texture: TextureAtlasSprite, ccrs: CCRenderState) {
+    override def renderBreaking(pos: Vector3, texture: TextureAtlasSprite, ccrs: CCRenderState): Unit = {
         ccrs.setPipeline(pos.translation(), new IconTransformation(texture))
         BlockRenderer.renderCuboid(ccrs, getBounds, 0)
     }

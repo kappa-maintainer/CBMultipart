@@ -18,7 +18,7 @@ import scala.collection.mutable.ListBuffer
 trait TModelRenderTile extends TileMultipartClient {
     private var modelPartList = ListBuffer[IModelRenderPart]()
 
-    override def copyFrom(that: TileMultipart) {
+    override def copyFrom(that: TileMultipart): Unit = {
         super.copyFrom(that)
         that match {
             case mt: TModelRenderTile => modelPartList = mt.modelPartList
@@ -26,7 +26,7 @@ trait TModelRenderTile extends TileMultipartClient {
         }
     }
 
-    override def bindPart(part: TMultiPart) {
+    override def bindPart(part: TMultiPart): Unit = {
         super.bindPart(part)
         part match {
             case mp: IModelRenderPart => modelPartList += mp
@@ -34,12 +34,12 @@ trait TModelRenderTile extends TileMultipartClient {
         }
     }
 
-    override def clearParts() {
+    override def clearParts(): Unit = {
         super.clearParts()
         modelPartList.clear()
     }
 
-    override def partRemoved(part: TMultiPart, p: Int) {
+    override def partRemoved(part: TMultiPart, p: Int): Unit = {
         super.partRemoved(part, p)
         part match {
             case mp: IModelRenderPart => modelPartList -= mp
@@ -59,7 +59,7 @@ trait TModelRenderTile extends TileMultipartClient {
         r
     }
 
-    override def renderDamage(pos: Vector3, texture: TextureAtlasSprite, ccrs: CCRenderState) {
+    override def renderDamage(pos: Vector3, texture: TextureAtlasSprite, ccrs: CCRenderState): Unit = {
         Minecraft.getMinecraft.objectMouseOver match {
             case hit: PartRayTraceResult if partList.isDefinedAt(hit.partIndex) => partList(hit.partIndex) match {
                 case p: IModelRenderPart =>
@@ -75,7 +75,7 @@ trait TModelRenderTile extends TileMultipartClient {
         }
     }
 
-    private def renderModel(list: ListBuffer[IModelRenderPart], f: (IBakedModel, IBlockState) => Unit) {
+    private def renderModel(list: ListBuffer[IModelRenderPart], f: (IBakedModel, IBlockState) => Unit): Unit = {
         import MultiPartRegistryClient._
         for (mp <- list) {
             val container = getModelPartContainer(mp)

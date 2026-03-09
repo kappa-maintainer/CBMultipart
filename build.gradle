@@ -5,7 +5,7 @@ plugins {
     id 'maven-publish'
     id 'com.gradleup.shadow' version '9.3.2'
     id 'org.jetbrains.gradle.plugin.idea-ext' version '1.4.1'
-    id 'xyz.wagyourtail.unimined' version '1.4.10-kappa'
+    id 'xyz.wagyourtail.unimined' version '1.4.12-kappa'
     id 'net.kyori.blossom' version '2.2.0'
 }
 
@@ -35,7 +35,7 @@ base {
 }
 
 scala {
-    scalaVersion = '2.13.18'
+    scalaVersion = '3.8.2'
 }
 
 java {
@@ -175,7 +175,7 @@ compileJava {
 }
 
 compileScala {
-    scalaCompileOptions.additionalParameters = ['-target:jvm-21']
+    //scalaCompileOptions.additionalParameters = ['-rewrite', '-source', '3.6-migration']
 }
 
 jar {

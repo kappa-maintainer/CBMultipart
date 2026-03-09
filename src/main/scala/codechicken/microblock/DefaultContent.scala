@@ -6,7 +6,7 @@ import net.minecraft.block._
 import net.minecraft.init.Blocks._
 
 object DefaultContent {
-    def load() {
+    def load(): Unit = {
         FaceMicroFactory.register(0)
         HollowMicroFactory.register(1)
         CornerMicroFactory.register(2)

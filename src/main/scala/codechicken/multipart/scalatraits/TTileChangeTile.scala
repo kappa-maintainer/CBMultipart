@@ -12,31 +12,31 @@ import net.minecraft.util.math.{BlockPos, Vec3i}
 trait TTileChangeTile extends TileMultipart {
     var weakTileChanges = false
 
-    override def copyFrom(that: TileMultipart) {
+    override def copyFrom(that: TileMultipart): Unit = {
         super.copyFrom(that)
         if (that.isInstanceOf[TTileChangeTile]) {
             weakTileChanges = that.asInstanceOf[TTileChangeTile].weakTileChanges
         }
     }
 
-    override def bindPart(part: TMultiPart) {
+    override def bindPart(part: TMultiPart): Unit = {
         super.bindPart(part)
         if (part.isInstanceOf[INeighborTileChangePart]) {
-            weakTileChanges |= part.asInstanceOf[INeighborTileChangePart].weakTileChanges
+            weakTileChanges |= part.asInstanceOf[INeighborTileChangePart].weakTileChanges()
         }
     }
 
-    override def clearParts() {
+    override def clearParts(): Unit = {
         super.clearParts()
         weakTileChanges = false
     }
 
-    override def partRemoved(part: TMultiPart, p: Int) {
+    override def partRemoved(part: TMultiPart, p: Int): Unit = {
         super.partRemoved(part, p)
-        weakTileChanges = partList.exists(p => p.isInstanceOf[INeighborTileChangePart] && p.asInstanceOf[INeighborTileChangePart].weakTileChanges)
+        weakTileChanges = partList.exists(p => p.isInstanceOf[INeighborTileChangePart] && p.asInstanceOf[INeighborTileChangePart].weakTileChanges())
     }
 
-    override def onNeighborTileChange(neighborPos: BlockPos) {
+    override def onNeighborTileChange(neighborPos: BlockPos): Unit = {
         super.onNeighborTileChange(neighborPos)
         val offset = new BlockPos(neighborPos).subtract(new Vec3i(getPos.getX, getPos.getY, getPos.getZ))
         val diff = MathHelper.absSum(offset)

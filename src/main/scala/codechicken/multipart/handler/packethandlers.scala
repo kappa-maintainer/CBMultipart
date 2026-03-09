@@ -29,7 +29,7 @@ class MultipartPH {
 }
 
 object MultipartCPH extends MultipartPH with IClientPacketHandler {
-    def handlePacket(packet: PacketCustom, mc: Minecraft, netHandler: INetHandlerPlayClient) {
+    def handlePacket(packet: PacketCustom, mc: Minecraft, netHandler: INetHandlerPlayClient): Unit = {
         try {
             packet.getType match {
                 case 1 => handlePartRegistration(packet, netHandler)
@@ -43,21 +43,21 @@ object MultipartCPH extends MultipartPH with IClientPacketHandler {
         }
     }
 
-    def handlePartRegistration(packet: PacketCustom, netHandler: INetHandlerPlayClient) {
+    def handlePartRegistration(packet: PacketCustom, netHandler: INetHandlerPlayClient): Unit = {
         val missing = MultiPartRegistry.readIDMap(packet)
         if (missing.nonEmpty) {
             netHandler.handleDisconnect(new SPacketDisconnect(new TextComponentTranslation("multipart.missing", missing.mkString(", "))))
         }
     }
 
-    def handleCompressedTileDesc(packet: PacketCustom, world: World) {
+    def handleCompressedTileDesc(packet: PacketCustom, world: World): Unit = {
         val cc = new ChunkPos(packet.readInt, packet.readInt)
         val num = packet.readUShort
         for (i <- 0 until num)
             TileMultipart.handleDescPacket(world, indexInChunk(cc, packet.readShort), packet)
     }
 
-    def handleCompressedTileData(packet: PacketCustom, world: World) {
+    def handleCompressedTileData(packet: PacketCustom, world: World): Unit = {
         var x = packet.readInt
         while (x != Int.MaxValue) {
             val pos = new BlockPos(x, packet.readInt, packet.readInt)
@@ -86,20 +86,20 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
     private val chunkWatchers = new MHashMap[Int, MSet[ChunkPos]] with MMultiMap[Int, ChunkPos]
     private val newWatchers = MMap[Int, JLinkedList[ChunkPos]]()
 
-    def handlePacket(packet: PacketCustom, sender: EntityPlayerMP, netHandler: INetHandlerPlayServer) {
+    def handlePacket(packet: PacketCustom, sender: EntityPlayerMP, netHandler: INetHandlerPlayServer): Unit = {
         packet.getType match {
             case 1 => ControlKeyModifer.map.put(sender, packet.readBoolean)
             case 10 => ItemPlacementHelper.place(sender, if(packet.readBoolean()) EnumHand.MAIN_HAND else EnumHand.OFF_HAND, sender.world)
         }
     }
 
-    def handshakeReceived(netHandler: NetHandlerPlayServer) {
+    def handshakeReceived(netHandler: NetHandlerPlayServer): Unit = {
         val packet = new PacketCustom(registryChannel, 1)
         MultiPartRegistry.writeIDMap(packet)
         netHandler.sendPacket(packet.toPacket)
     }
 
-    def onWorldUnload(world: World) {
+    def onWorldUnload(world: World): Unit = {
         if (!world.isRemote) {
             updateMap.remove(world)
         }
@@ -117,7 +117,7 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
             s
         })
 
-    def onTickEnd(players: Seq[EntityPlayerMP]) {
+    def onTickEnd(players: Seq[EntityPlayerMP]): Unit = {
         PacketScheduler.sendScheduled()
 
         for (p <- players if chunkWatchers.asJava.containsKey(p.getEntityId)) {
@@ -151,11 +151,11 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
         newWatchers.clear()
     }
 
-    def onChunkWatch(p: EntityPlayer, c: ChunkPos) {
+    def onChunkWatch(p: EntityPlayer, c: ChunkPos): Unit = {
         newWatchers.getOrElseUpdate(p.getEntityId, new JLinkedList).add(c)
     }
 
-    def onChunkUnWatch(p: EntityPlayer, c: ChunkPos) {
+    def onChunkUnWatch(p: EntityPlayer, c: ChunkPos): Unit = {
         newWatchers.get(p.getEntityId) match {
             case Some(chunks) => chunks.remove(c)
             case _ =>

@@ -40,7 +40,7 @@ abstract class Microblock(var material: Int = 0) extends TMultiPart with TCuboid
      * @param size A 28 bit value representing the current size
      * @param slot A 4 bit value representing the current slot
      */
-    def setShape(size: Int, slot: Int) {
+    def setShape(size: Int, slot: Int): Unit = {
         shape = (size << 4 | slot).toByte
     }
 
@@ -76,31 +76,31 @@ abstract class Microblock(var material: Int = 0) extends TMultiPart with TCuboid
         null //unreachable
     }
 
-    override def writeDesc(packet: MCDataOutput) {
+    override def writeDesc(packet: MCDataOutput): Unit = {
         writeMaterialID(packet, material) //read by IDynamicPartFactory
         packet.writeByte(shape)
     }
 
-    override def readDesc(packet: MCDataInput) {
+    override def readDesc(packet: MCDataInput): Unit = {
         //matrialID writtin in writeDesc is read by the factory, no need to read it here
         shape = packet.readByte
     }
 
-    def sendShapeUpdate() {
+    def sendShapeUpdate(): Unit = {
         getWriteStream.writeByte(shape)
     }
 
-    override def read(packet: MCDataInput) {
+    override def read(packet: MCDataInput): Unit = {
         super.read(packet)
         tile.notifyPartChange(this)
     }
 
-    override def save(tag: NBTTagCompound) {
+    override def save(tag: NBTTagCompound): Unit = {
         tag.setByte("shape", shape)
         tag.setString("material", materialName(material))
     }
 
-    override def load(tag: NBTTagCompound) {
+    override def load(tag: NBTTagCompound): Unit = {
         shape = tag.getByte("shape")
         material = materialID(tag.getString("material"))
     }
@@ -138,13 +138,13 @@ trait MicroblockClient extends Microblock with TIconHitEffectsPart with IMicroMa
      * @param layer The block layer, null for inventory rendering
      * @param ccrs  The CCRenderState to add the verts to
      */
-    def render(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState)
+    def render(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState): Unit 
 
     override def getRenderBounds = getBounds
 }
 
 trait CommonMicroblockClient extends CommonMicroblock with MicroblockClient with TMicroOcclusionClient {
-    override def render(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState) {
+    override def render(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState): Unit = {
         if (layer == null) {
             MicroblockRender.renderCuboid(pos, ccrs, getIMaterial, layer, getBounds, 0)
         } else {

@@ -33,14 +33,14 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TTESRRenderTile] with
     val renderType = BlockRenderingRegistry.createRenderType("fmpcbe_mpblock")
     var batchBuffer: Tessellator = null
 
-    def init() {
+    def init(): Unit = {
         BlockRenderingRegistry.registerRenderer(renderType, this)
         val mapping = new ObfMapping("net/minecraft/client/renderer/tileentity/TileEntityRendererDispatcher", "batchBuffer", "net/minecraft/client/renderer/Tessellator")
         batchBuffer = ReflectionManager.getField(mapping, TileEntityRendererDispatcher.instance, classOf[Tessellator])
     }
 
 
-    override def render(tile: TTESRRenderTile, x: Double, y: Double, z: Double, delta: Float, destroyStage: Int, alpha: Float) {
+    override def render(tile: TTESRRenderTile, x: Double, y: Double, z: Double, delta: Float, destroyStage: Int, alpha: Float): Unit = {
         val pos = new Vector3(x, y, z)
         val pass = MinecraftForgeClient.getRenderPass
         val ccrs = CCRenderState.instance()
@@ -83,7 +83,7 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TTESRRenderTile] with
         }
     }
 
-    override def renderTileEntityFast(tile: TTESRRenderTile, x: Double, y: Double, z: Double, frame: Float, destroyStage: Int, alpha: Float, buffer: BufferBuilder) {
+    override def renderTileEntityFast(tile: TTESRRenderTile, x: Double, y: Double, z: Double, frame: Float, destroyStage: Int, alpha: Float, buffer: BufferBuilder): Unit = {
         val ccrs = CCRenderState.instance()
         ccrs.reset()
         buffer.setTranslation(0, 0, 0)
@@ -103,7 +103,7 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TTESRRenderTile] with
                 tile.renderStatic(Vector3.fromBlockPos(pos), MinecraftForgeClient.getRenderLayer, ccrs)
         }
 
-    override def handleRenderBlockDamage(world: IBlockAccess, pos: BlockPos, state: IBlockState, sprite: TextureAtlasSprite, buffer: BufferBuilder) {
+    override def handleRenderBlockDamage(world: IBlockAccess, pos: BlockPos, state: IBlockState, sprite: TextureAtlasSprite, buffer: BufferBuilder): Unit = {
         getClientTile(world, pos) match {
             case null =>
             case tile =>
@@ -114,9 +114,9 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TTESRRenderTile] with
         }
     }
 
-    override def renderBrightness(state: IBlockState, brightness: Float) {}
+    override def renderBrightness(state: IBlockState, brightness: Float): Unit = {}
 
-    override def registerTextures(map: TextureMap) {}
+    override def registerTextures(map: TextureMap): Unit = {}
 }
 
 //TODO, This is probably not needed?

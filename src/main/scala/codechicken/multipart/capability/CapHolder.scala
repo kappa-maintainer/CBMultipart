@@ -8,7 +8,7 @@ import net.minecraftforge.common.capabilities.Capability
  */
 class CapHolder[T >: Any] {
 
-    var cap: Capability[T] = _
-    var generic: T = _
+    var cap: Capability[T] = scala.compiletime.uninitialized
+    var generic: T = scala.compiletime.uninitialized
     var sided = Map.empty[EnumFacing, T]
 }

@@ -41,5 +41,5 @@ trait TDynamicRenderPart extends TMultiPart with TTESRPart {
      * @param frameDelta The partial interpolation frame value for animations between ticks
      */
     @SideOnly(Side.CLIENT)
-    def renderDynamic(pos: Vector3, pass: Int, frameDelta: Float) {}
+    def renderDynamic(pos: Vector3, pass: Int, frameDelta: Float): Unit = {}
 }

@@ -229,7 +229,7 @@ class ScalaSignature(val bytes: Bytes) {
 
     case class EnumLiteral(value: ExternalSymbol) extends Literal
 
-    case class ArrayLiteral(value: List[_]) extends Literal
+    case class ArrayLiteral(value: List[?]) extends Literal
 
     case class AnnotationInfo(owner: SymbolRef, annType: TypeRef, values: Map[String, Literal]) {
         def getValue[T](name: String) = values(name).asInstanceOf[T]
@@ -326,11 +326,11 @@ class ByteCodeReader(val bc: Bytes) {
     def readNat = {
         var r = 0
         var b = 0
-        do {
+        while ({ {
             b = readByte
             r = r << 7 | b & 0x7F
         }
-        while ((b & 0x80) != 0)
+        ; (b & 0x80) != 0}) ()
         r
     }
 

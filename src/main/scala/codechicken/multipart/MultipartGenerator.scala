@@ -24,11 +24,11 @@ import scala.collection.mutable.{Map => MMap}
  * There are several mixin traits that come with the API included in the scalatraits package. TPartialOcclusionTile is defined as class instead of trait to give an example for Java programmers.
  */
 object MultipartGenerator extends ScratchBitSet {
-    private val tileTraitMap = MMap[Class[_], JBitSet]()
+    private val tileTraitMap = MMap[Class[?], JBitSet]()
     private val interfaceTraitMap_c = MMap[String, String]()
     private val interfaceTraitMap_s = MMap[String, String]()
-    private val partTraitMap_c = MMap[Class[_], JBitSet]()
-    private val partTraitMap_s = MMap[Class[_], JBitSet]()
+    private val partTraitMap_c = MMap[Class[?], JBitSet]()
+    private val partTraitMap_s = MMap[Class[?], JBitSet]()
     private val clientTraitId = MultipartMixinFactory.registerTrait(classOf[TileMultipartClient])
 
     private def partTraitMap(client: Boolean) = if (client) partTraitMap_c else partTraitMap_s
@@ -37,8 +37,8 @@ object MultipartGenerator extends ScratchBitSet {
 
     private def traitsForPart(part: TMultiPart, client: Boolean) =
         partTraitMap(client).getOrElseUpdate(part.getClass, {
-            def heirachy(clazz: Class[_]): Seq[Class[_]] = {
-                var superClasses: Seq[Class[_]] = clazz.getInterfaces.flatMap(c => heirachy(c)) :+ clazz
+            def heirachy(clazz: Class[?]): Seq[Class[?]] = {
+                var superClasses: Seq[Class[?]] = clazz.getInterfaces.flatMap(c => heirachy(c)) :+ clazz
                 if (clazz.getSuperclass != null) {
                     superClasses = superClasses ++ heirachy(clazz.getSuperclass)
                 }
@@ -104,7 +104,7 @@ object MultipartGenerator extends ScratchBitSet {
     /**
      * Adds a tile entity to the world without notifying neighbor blocks or adding it to the tick list
      */
-    def silentAddTile(world: World, pos: BlockPos, tile: TileEntity) {
+    def silentAddTile(world: World, pos: BlockPos, tile: TileEntity): Unit = {
         val chunk = world.getChunk(pos)
         if (chunk != null) {
             chunk.addTileEntity(pos, tile)
@@ -147,7 +147,7 @@ object MultipartGenerator extends ScratchBitSet {
      * c_trait for client worlds (may be null)
      * s_trait for server worlds (may be null)
      */
-    def registerTrait(s_interface$: String, c_trait$: String, s_trait$: String) {
+    def registerTrait(s_interface$: String, c_trait$: String, s_trait$: String): Unit = {
         val s_interface = nodeName(s_interface$)
         val c_trait = nodeName(c_trait$)
         val s_trait = nodeName(s_trait$)
@@ -176,7 +176,7 @@ object MultipartGenerator extends ScratchBitSet {
      *
      * This allows compatibility with APIs that expect interfaces on the tile entity.
      */
-    def registerPassThroughInterface(s_interface: String, client: Boolean, server: Boolean) {
+    def registerPassThroughInterface(s_interface: String, client: Boolean, server: Boolean): Unit = {
         val tType = MultipartMixinFactory.generatePassThroughTrait(s_interface)
         if (tType == null) {
             return
@@ -185,7 +185,7 @@ object MultipartGenerator extends ScratchBitSet {
         registerTrait(s_interface, if (client) tType else null, if (server) tType else null)
     }
 
-    private[multipart] def registerTileClass(clazz: Class[_ <: TileMultipart], traits: JBitSet) {
+    private[multipart] def registerTileClass(clazz: Class[? <: TileMultipart], traits: JBitSet): Unit = {
         tileTraitMap.put(clazz, traits.copy)
         MultipartProxy.onTileClassBuilt(clazz)
     }

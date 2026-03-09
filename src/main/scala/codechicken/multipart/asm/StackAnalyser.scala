@@ -154,7 +154,7 @@ class StackAnalyser(val owner: Type, val m: MethodNode) {
 
     def peek(i: Int = 0) = stack(stack.size - i - 1)
 
-    def insert(i: Int, entry: StackEntry) {
+    def insert(i: Int, entry: StackEntry): Unit = {
         if (entry.getType.getSize == 0) {
             return
         }
@@ -172,7 +172,7 @@ class StackAnalyser(val owner: Type, val m: MethodNode) {
         args
     }
 
-    def visitInsn(ainsn: AbstractInsnNode) {
+    def visitInsn(ainsn: AbstractInsnNode): Unit = {
         implicit val thisInsn = ainsn //passes to any StackEntry we create
         ainsn match {
             case insn: InsnNode => ainsn.getOpcode match {

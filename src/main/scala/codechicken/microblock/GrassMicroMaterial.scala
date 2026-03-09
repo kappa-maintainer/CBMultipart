@@ -10,9 +10,9 @@ import net.minecraft.init.Blocks
 import net.minecraft.util.BlockRenderLayer
 
 class GrassMicroMaterial(val $materialID: String) extends BlockMicroMaterial(Blocks.GRASS.getDefaultState, $materialID) {
-    var sideIconT: IconTransformation = _
+    var sideIconT: IconTransformation = scala.compiletime.uninitialized
 
-    override def loadIcons() {
+    override def loadIcons(): Unit = {
         super.loadIcons()
         sideIconT = new IconTransformation(TextureUtils.getIconsForBlock(Blocks.GRASS.getDefaultState, 2)(1))
     }
@@ -27,7 +27,7 @@ class GrassMicroMaterial(val $materialID: String) extends BlockMicroMaterial(Blo
         }
 
         if (side > 1) {
-            list += MaterialRenderHelper.instance.start(pos, layer, new UVTranslation(0, bounds.max.y - 1) ++ sideIconT)
+            list += MaterialRenderHelper.instance.start(pos, layer, new UVTranslation(0, bounds.max.y - 1).$plus$plus(sideIconT))
                 .blockColour(getColour(layer)).lighting().result()
         }
 
@@ -44,7 +44,7 @@ class TopMicroMaterial($state: IBlockState, $materialID: String) extends BlockMi
         if (side <= 1) {
             list += MaterialRenderHelper.instance.start(pos, layer, icont).blockColour(getColour(layer)).lighting().result()
         } else {
-            list += MaterialRenderHelper.instance.start(pos, layer, new UVTranslation(0, bounds.max.y - 1) ++ icont)
+            list += MaterialRenderHelper.instance.start(pos, layer, new UVTranslation(0, bounds.max.y - 1).$plus$plus(icont))
                 .blockColour(getColour(layer)).lighting().result()
         }
 
