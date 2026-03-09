@@ -41,16 +41,16 @@ class ItemSaw(sawTag: ConfigTag, val harvestLevel: Int) extends Item with Saw {
         setCreativeTab(CreativeTabs.TOOLS)
     }
 
-    override def hasContainerItem = true
+    override def hasContainerItem: Boolean = true
 
-    override def getContainerItem(stack: ItemStack) =
+    override def getContainerItem(stack: ItemStack): ItemStack =
         if (isDamageable) {
             new ItemStack(stack.getItem, 1, stack.getItemDamage + 1)
         } else {
             stack
         }
 
-    def getCuttingStrength(item: ItemStack) = harvestLevel
+    def getCuttingStrength(item: ItemStack): Int = harvestLevel
 }
 
 object ItemSawRenderer extends IItemRenderer {

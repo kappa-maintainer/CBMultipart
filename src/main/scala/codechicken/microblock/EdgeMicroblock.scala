@@ -8,7 +8,7 @@ import codechicken.lib.vec._
 import codechicken.multipart._
 import net.minecraft.util.{BlockRenderLayer, ResourceLocation}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object EdgePlacement extends PlacementProperties {
 
@@ -48,7 +48,7 @@ object EdgePlacement extends PlacementProperties {
         }
 
         if (pmt.internal && !pmt.oppMod) {
-            return pmt.internalPlacement(pmt.htile.asInstanceOf[TileMultipart], part)
+            return pmt.internalPlacement(pmt.htile part)
         }
 
         pmt.externalPlacement(part)

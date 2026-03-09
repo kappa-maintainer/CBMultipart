@@ -10,7 +10,7 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.util.{BlockRenderLayer, ResourceLocation}
 import org.lwjgl.opengl.GL11
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object HollowPlacement extends PlacementProperties {
 
@@ -194,24 +194,24 @@ trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclu
         val y2 = c.max.y
         val z1 = c.min.z
         val z2 = c.max.z
-        asJavaIterable(
+        
         getSlot match {
             case 0 | 1 =>
                 Seq(new Cuboid6(d2, y1, d1, x2, y2, d2),
                     new Cuboid6(x1, y1, d1, d1, y2, d2),
                     new Cuboid6(x1, y1, d2, x2, y2, z2),
-                    new Cuboid6(x1, y1, z1, x2, y2, d1))
+                    new Cuboid6(x1, y1, z1, x2, y2, d1)).asJava
             case 2 | 3 =>
                 Seq(new Cuboid6(d1, d2, z1, d2, y2, z2),
                     new Cuboid6(d1, y1, z1, d2, d1, z2),
                     new Cuboid6(d2, y1, z1, x2, y2, z2),
-                    new Cuboid6(x1, y1, z1, d1, y2, z2))
+                    new Cuboid6(x1, y1, z1, d1, y2, z2)).asJava
             case 4 | 5 =>
                 Seq(new Cuboid6(x1, d1, d2, x2, d2, z2),
                     new Cuboid6(x1, d1, z1, x2, d2, d1),
                     new Cuboid6(x1, d2, z1, x2, y2, z2),
-                    new Cuboid6(x1, y1, z1, x2, d1, z2))
-        })
+                    new Cuboid6(x1, y1, z1, x2, d1, z2)).asJava
+        }
     }
 
     override def getCollisionBoxes = {

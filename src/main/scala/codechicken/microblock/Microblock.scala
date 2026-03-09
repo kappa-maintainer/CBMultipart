@@ -3,35 +3,39 @@ package codechicken.microblock
 import codechicken.lib.data.{MCDataInput, MCDataOutput}
 import codechicken.lib.raytracer.CuboidRayTraceResult
 import codechicken.lib.render.CCRenderState
+import codechicken.lib.vec.Cuboid6
 import codechicken.lib.vec.Vector3
 import codechicken.microblock.MicroMaterialRegistry._
 import codechicken.multipart._
+import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.BlockRenderLayer
+import net.minecraft.util.ResourceLocation
 import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.ListBuffer
+import scala.util.boundary
 
 abstract class Microblock(var material: Int = 0) extends TMultiPart with TCuboidPart {
     var shape: Byte = 0
 
     def microFactory: MicroblockFactory
 
-    def getType = microFactory.getName
+    def getType: ResourceLocation = microFactory.getName
 
-    override def getStrength(player: EntityPlayer, hit: CuboidRayTraceResult) = getIMaterial match {
+    override def getStrength(player: EntityPlayer, hit: CuboidRayTraceResult): Float = getIMaterial match {
         case null => super.getStrength(player, hit)
         case mat => mat.getStrength(player)
     }
 
-    def getSize = shape >> 4
+    def getSize: Int = shape >> 4
 
-    def getShapeSlot = shape & 0xF
+    def getShapeSlot: Int = shape & 0xF
 
     /**
      * General purpose microblock description value. These values are only used by
@@ -44,16 +48,16 @@ abstract class Microblock(var material: Int = 0) extends TMultiPart with TCuboid
         shape = (size << 4 | slot).toByte
     }
 
-    def getMaterial = material
+    def getMaterial: Int = material
 
-    def getIMaterial = MicroMaterialRegistry.getMaterial(material)
+    def getIMaterial: IMicroMaterial = MicroMaterialRegistry.getMaterial(material)
 
     /**
      * The factory ID that will be put into the ItemStack damage value
      */
     def itemFactoryID: Int
 
-    override def getDrops = {
+    override def getDrops: java.util.List[ItemStack] = {
         var size = getSize
         val items = ListBuffer[ItemStack]()
         for (s <- Seq(4, 2, 1)) {
@@ -67,13 +71,14 @@ abstract class Microblock(var material: Int = 0) extends TMultiPart with TCuboid
     }
 
     override def pickItem(hit: CuboidRayTraceResult): ItemStack = {
-        val size = getSize
-        for (s <- Seq(4, 2, 1))
-            if (size % s == 0 && size / s >= 1) {
-                return ItemMicroPart.create(itemFactoryID, size, MicroMaterialRegistry.materialName(material))
-            }
-
-        null //unreachable
+        boundary:
+            val size = getSize
+            for (s <- Seq(4, 2, 1))
+                if (size % s == 0 && size / s >= 1) {
+                    boundary.break(ItemMicroPart.create(itemFactoryID, size, MicroMaterialRegistry.materialName(material)))
+                }
+    
+            null //unreachable
     }
 
     override def writeDesc(packet: MCDataOutput): Unit = {
@@ -105,24 +110,24 @@ abstract class Microblock(var material: Int = 0) extends TMultiPart with TCuboid
         material = materialID(tag.getString("material"))
     }
 
-    def isTransparent = getIMaterial.isTransparent
+    def isTransparent: Boolean = getIMaterial.isTransparent
 
-    override def getLightValue = getIMaterial.getLightValue
+    override def getLightValue: Int = getIMaterial.getLightValue
 
-    override def getExplosionResistance(entity: Entity) = getIMaterial.explosionResistance(entity) * microFactory.getResistanceFactor
+    override def getExplosionResistance(entity: Entity): Float = getIMaterial.explosionResistance(entity) * microFactory.getResistanceFactor
 }
 
 trait MicroblockClient extends Microblock with TIconHitEffectsPart with IMicroMaterialRender {
     @SideOnly(Side.CLIENT)
-    override def getBreakingIcon(hit: CuboidRayTraceResult) = getBrokenIcon(hit.sideHit.ordinal)
+    override def getBreakingIcon(hit: CuboidRayTraceResult): TextureAtlasSprite = getBrokenIcon(hit.sideHit.ordinal)
 
     @SideOnly(Side.CLIENT)
-    def getBrokenIcon(side: Int) = getIMaterial match {
+    override def getBrokenIcon(side: Int): TextureAtlasSprite = getIMaterial match {
         case null => ModelLoader.White.INSTANCE
         case mat => mat.getBreakingIcon(side)
     }
 
-    override def renderStatic(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState) = {
+    override def renderStatic(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState): Boolean = {
         if (layer != null && getIMaterial.canRenderInLayer(layer)) {
             render(pos, layer, ccrs)
             true
@@ -138,9 +143,9 @@ trait MicroblockClient extends Microblock with TIconHitEffectsPart with IMicroMa
      * @param layer The block layer, null for inventory rendering
      * @param ccrs  The CCRenderState to add the verts to
      */
-    def render(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState): Unit 
+    def render(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState): Unit
 
-    override def getRenderBounds = getBounds
+    override def getRenderBounds: Cuboid6 = getBounds
 }
 
 trait CommonMicroblockClient extends CommonMicroblock with MicroblockClient with TMicroOcclusionClient {
@@ -156,11 +161,11 @@ trait CommonMicroblockClient extends CommonMicroblock with MicroblockClient with
 trait CommonMicroblock extends Microblock with TPartialOcclusionPart with TMicroOcclusion with TSlottedPart {
     def microFactory: CommonMicroFactory
 
-    def getSlot = getShapeSlot
+    def getSlot: Int = getShapeSlot
 
-    def getSlotMask = 1 << getSlot
+    def getSlotMask: Int = 1 << getSlot
 
-    def getPartialOcclusionBoxes = Seq(getBounds).asJava
+    def getPartialOcclusionBoxes: java.util.List[Cuboid6] = Seq(getBounds).asJava
 
-    override def itemFactoryID = microFactory.getFactoryID
+    override def itemFactoryID: Int = microFactory.getFactoryID
 }

@@ -99,7 +99,7 @@ object RedstoneInteractions {
     /**
      * Hardcoded vanilla overrides for Block.canConnectRedstone (see @IRedstoneConnectorBlock)
      */
-    val fullVanillaBlocks = Set(
+    val fullVanillaBlocks: Set[Block] = Set(
         Blocks.REDSTONE_TORCH,
         Blocks.UNLIT_REDSTONE_TORCH,
         Blocks.LEVER,

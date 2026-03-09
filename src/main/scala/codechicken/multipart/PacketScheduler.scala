@@ -2,7 +2,8 @@ package codechicken.multipart
 
 import codechicken.lib.data.{MCDataInput, MCDataOutput}
 
-import scala.collection.mutable.{Map => MMap}
+import scala.collection.mutable
+import scala.collection.mutable.Map as MMap
 
 /**
  * Static class for packing update data.
@@ -11,7 +12,7 @@ import scala.collection.mutable.{Map => MMap}
  * This prevents sending multiple packets if the same property updates more than once per tick.
  */
 object PacketScheduler {
-    private val map = MMap[TMultiPart, Long]()
+    private val map = mutable.Map[TMultiPart, Long]()
 
     /**
      * Add bits to the current update mask for part. (binary OR)

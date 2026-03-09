@@ -16,6 +16,7 @@ import net.minecraft.client.particle.ParticleManager
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
+import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.math.{AxisAlignedBB, BlockPos, RayTraceResult, Vec3d}
 import net.minecraft.util.{BlockRenderLayer, EnumFacing, EnumHand}
 import net.minecraft.world.{Explosion, IBlockAccess, World}
@@ -69,7 +70,7 @@ class BlockMultipart extends Block(Material.ROCK) {
 
     override def hasTileEntity(state: IBlockState) = true
 
-    override def createTileEntity(world: World, state: IBlockState) = {
+    override def createTileEntity(world: World, state: IBlockState): TileEntity = {
         if(world.isRemote) {
             null
         } else {
