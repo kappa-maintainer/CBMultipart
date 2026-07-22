@@ -19,8 +19,6 @@ publishing {
             groupId = propertyString('root_package')
             artifactId = propertyString('mod_id')
             version = project.version
-            artifact sourcesJar
-            from components.java
         }
     }
 }
