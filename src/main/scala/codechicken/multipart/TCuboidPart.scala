@@ -8,7 +8,7 @@ import codechicken.lib.vec.uv.IconTransformation
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
  * Trait for parts that are simply a cuboid, having one bounding box. Overrides TMultiPart functions to this effect.

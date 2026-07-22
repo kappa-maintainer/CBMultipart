@@ -31,7 +31,7 @@ dependencies {
     modRuntimeOnly 'com.cleanroommc:scalar:1.0.0'
 
     modImplementation 'codechicken:CodeChickenLib:3.3.5'
-    modImplementation 'mezz:jei:4.29.15'
+    modImplementation 'mezz:jei:4.32.0'
     modImplementation 'codechicken:ChickenASM:4.0.1'
     
 

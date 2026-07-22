@@ -22,7 +22,7 @@ import net.minecraft.util.{BlockRenderLayer, EnumFacing, EnumHand}
 import net.minecraft.world.{Explosion, IBlockAccess, World}
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
  * Internal RayTracing class that can save parts as part of their hit data
@@ -57,6 +57,7 @@ object BlockMultipart {
         (getClientTile(world, hit.getBlockPos), hit) match {
             case (null, _) => false
             case (tile, pHit: PartRayTraceResult) => tile.drawHighlight(player, pHit, frame)
+            case _ => false
         }
     }
 }
@@ -146,7 +147,8 @@ class BlockMultipart extends Block(Material.ROCK) {
     override def getPlayerRelativeBlockHardness(state: IBlockState, player: EntityPlayer, world: World, pos: BlockPos): Float =
         (getTile(world, pos), retracePart(world, pos, player)) match {
             case (tile: TileMultipart, hit: PartRayTraceResult) => tile.getPlayerRelativeBlockHardness(player, hit)
-            case _ => 1 / 100F
+            case (null, _) => 1 / 100F
+            case (_, null) => 1 / 100F
         }
 
     override def removedByPlayer(state: IBlockState, world: World, pos: BlockPos, player: EntityPlayer, willHarvest: Boolean): Boolean = {
@@ -187,19 +189,22 @@ class BlockMultipart extends Block(Material.ROCK) {
     override def getPickBlock(state: IBlockState, target: RayTraceResult, world: World, pos: BlockPos, player: EntityPlayer): ItemStack =
         (getTile(world, pos), retracePart(world, pos, player)) match {
             case (tile: TileMultipart, hit: PartRayTraceResult) => tile.getPickBlock(hit)
-            case _ => ItemStack.EMPTY
+            case (null, _) => ItemStack.EMPTY
+            case (_, null) => ItemStack.EMPTY
         }
 
     override def onBlockActivated(world: World, pos: BlockPos, state: IBlockState, player: EntityPlayer, hand: EnumHand, side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean =
         (getTile(world, pos), retracePart(world, pos, player)) match {
             case (tile: TileMultipart, hit: PartRayTraceResult) => tile.onBlockActivated(player, hit, hand)
-            case _ => false
+            case (null, _) => false
+            case (_, null) => false
         }
 
     override def onBlockClicked(world: World, pos: BlockPos, player: EntityPlayer): Unit = {
         (getTile(world, pos), retracePart(world, pos, player)) match {
             case (tile: TileMultipart, hit: PartRayTraceResult) => tile.onBlockClicked(player, hit)
-            case _ =>
+            case (null, _) =>
+            case (_, null) =>
         }
     }
 

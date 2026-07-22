@@ -38,7 +38,7 @@ object MultipartGenerator extends ScratchBitSet {
     private def traitsForPart(part: TMultiPart, client: Boolean) =
         partTraitMap(client).getOrElseUpdate(part.getClass, {
             def heirachy(clazz: Class[?]): Seq[Class[?]] = {
-                var superClasses: Seq[Class[?]] = clazz.getInterfaces.flatMap(c => heirachy(c)) :+ clazz
+                var superClasses: Seq[Class[?]] = clazz.getInterfaces.toSeq.flatMap(c => heirachy(c)) :+ clazz
                 if (clazz.getSuperclass != null) {
                     superClasses = superClasses ++ heirachy(clazz.getSuperclass)
                 }

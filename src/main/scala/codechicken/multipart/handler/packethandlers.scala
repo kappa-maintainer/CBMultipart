@@ -20,8 +20,8 @@ import net.minecraft.util.text.{TextComponentString, TextComponentTranslation}
 import net.minecraft.world.World
 import net.minecraft.world.chunk.Chunk
 
-import scala.collection.JavaConverters._
-import scala.collection.mutable.{HashMap => MHashMap, Map => MMap, MultiMap => MMultiMap, Set => MSet}
+import scala.jdk.CollectionConverters._
+import scala.collection.mutable.{Map => MMap, Set => MSet}
 
 class MultipartPH {
     val channel = MultipartMod
@@ -83,7 +83,7 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
     /**
      * These maps are keyed by entityID so that new player instances with the same entity id don't conflict world references
      */
-    private val chunkWatchers = new MHashMap[Int, MSet[ChunkPos]] with MMultiMap[Int, ChunkPos]
+    private val chunkWatchers = MMap[Int, MSet[ChunkPos]]()
     private val newWatchers = MMap[Int, JLinkedList[ChunkPos]]()
 
     def handlePacket(packet: PacketCustom, sender: EntityPlayerMP, netHandler: INetHandlerPlayServer): Unit = {
@@ -145,7 +145,7 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
                 val chunk = p.world.getChunk(c.x, c.z)
                 val pkt = getDescPacket(chunk, chunk.getTileEntityMap.values.iterator)
                 if (pkt != null) pkt.sendToPlayer(p)
-                chunkWatchers.addBinding(p.getEntityId, c)
+                chunkWatchers.getOrElseUpdate(p.getEntityId, MSet()).add(c)
             }
         }
         newWatchers.clear()
@@ -160,7 +160,10 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
             case Some(chunks) => chunks.remove(c)
             case _ =>
         }
-        chunkWatchers.removeBinding(p.getEntityId, c)
+        chunkWatchers.get(p.getEntityId).foreach { chunks =>
+            chunks.remove(c)
+            if (chunks.isEmpty) chunkWatchers.remove(p.getEntityId)
+        }
     }
 
     def getDescPacket(chunk: Chunk, it: JIterator[TileEntity]): PacketCustom = {

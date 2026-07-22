@@ -19,7 +19,7 @@ import net.minecraftforge.common.ForgeHooks
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
 import java.util.{LinkedList => JLinkedList}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object MaterialRenderHelper {
     private val instances = new ThreadLocal[MaterialRenderHelper] {

@@ -4,7 +4,7 @@ import java.lang.Iterable
 
 import codechicken.lib.vec.Cuboid6
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
  * This suite of 3 classes provides simple functions for standard bounding box based occlusion testing.
@@ -16,7 +16,7 @@ object NormalOcclusionTest {
     /**
      * Performs the test, returns true if the test fails
      */
-    def apply(boxes1: Traversable[Cuboid6], boxes2: Traversable[Cuboid6]): Boolean =
+    def apply(boxes1: scala.collection.Iterable[Cuboid6], boxes2: scala.collection.Iterable[Cuboid6]): Boolean =
         boxes1.forall(v1 => boxes2.forall(v2 => !v1.intersects(v2)))
 
     /**

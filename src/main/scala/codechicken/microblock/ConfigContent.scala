@@ -8,7 +8,7 @@ import net.minecraft.block.Block
 import net.minecraft.item.ItemStack
 import net.minecraftforge.fml.common.event.FMLInterModComms.IMCMessage
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.{Map => MMap}
 
 object ConfigContent {
@@ -62,7 +62,7 @@ object ConfigContent {
                 throw new IllegalArgumentException("Name must be followed by a colon separator")
             }
 
-            metas = line.substring(q2 + 2).split(",").flatMap { s =>
+            metas = line.substring(q2 + 2).split(",").toSeq.flatMap { s =>
                 if (s.contains("-")) {
                     val split2 = s.split("-")
                     if (split2.length != 2) {

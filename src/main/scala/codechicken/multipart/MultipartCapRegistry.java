@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import net.minecraftforge.common.capabilities.Capability;
 import scala.Function1;
 import scala.collection.Iterable;
-import scala.collection.JavaConverters;
+import scala.jdk.javaapi.CollectionConverters;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +31,7 @@ public class MultipartCapRegistry {
      * @param <T>  Type.
      */
     public static <T> void registerCapMerger(Capability<T> cap, Function<java.lang.Iterable<T>, T> func) {
-        mergers.putIfAbsent(cap, (Function<Iterable<T>, T>)iter -> func.apply(JavaConverters.asJavaIterableConverter(iter).asJava()));
+        mergers.putIfAbsent(cap, (Function<Iterable<T>, T>)iter -> func.apply(CollectionConverters.asJava(iter)));
     }
 
     /**

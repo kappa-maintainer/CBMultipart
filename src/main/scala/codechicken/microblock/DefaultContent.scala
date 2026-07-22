@@ -27,11 +27,11 @@ object DefaultContent {
         createAndRegister(IRON_ORE)
         createAndRegister(COAL_ORE)
 
-        createAndRegister(BlockPlanks.EnumType.values.take(4).map {
+        createAndRegister(BlockPlanks.EnumType.values.take(4).toSeq.map {
             LOG.getDefaultState.withProperty(BlockOldLog.VARIANT, _)
         })
 
-        createAndRegister(BlockPlanks.EnumType.values.take(4).map {
+        createAndRegister(BlockPlanks.EnumType.values.take(4).toSeq.map {
             LEAVES.getDefaultState.withProperty(BlockOldLeaf.VARIANT, _)
         })
 
@@ -68,11 +68,11 @@ object DefaultContent {
         createAndRegister(QUARTZ_BLOCK, 0 to 2)
         createAndRegister(STAINED_HARDENED_CLAY, 0 to 15)
 
-        createAndRegister(BlockPlanks.EnumType.values.drop(4).map {
+        createAndRegister(BlockPlanks.EnumType.values.drop(4).toSeq.map {
             LEAVES2.getDefaultState.withProperty(BlockNewLeaf.VARIANT, _)
         })
 
-        createAndRegister(BlockPlanks.EnumType.values().drop(4).map {
+        createAndRegister(BlockPlanks.EnumType.values().drop(4).toSeq.map {
             LOG2.getDefaultState.withProperty(BlockNewLog.VARIANT, _)
         })
 

@@ -26,7 +26,7 @@ import net.minecraft.util.{BlockRenderLayer, EnumFacing, EnumHand, ResourceLocat
 import net.minecraft.world.{EnumSkyBlock, World}
 import net.minecraftforge.common.capabilities.{Capability, ICapabilityProvider}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.ListBuffer
 
 class TileMultipart extends TileEntity with IChunkLoadTile {
@@ -346,13 +346,13 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
      * Perform a raytrace returning all intersecting parts sorted nearest to farthest
      */
     def rayTraceAll(start: Vec3d, end: Vec3d): JIterable[PartRayTraceResult] = {
-        var list = ListBuffer[PartRayTraceResult]()
+        val list = ListBuffer[PartRayTraceResult]()
         for ((p, i) <- partList.view.zipWithIndex)
             p.collisionRayTrace(start, end) match {
                 case crtr: CuboidRayTraceResult =>
                     val partMOP = new PartRayTraceResult(i, crtr)
                     list += partMOP
-                case _ =>
+                case null =>
             }
 
         list.asInstanceOf[ListBuffer[DistanceRayTraceResult]].sorted.asInstanceOf[ListBuffer[PartRayTraceResult]].asJava
@@ -361,7 +361,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
     /**
      * Drop and remove part at index (internal mining callback)
      */
-    def harvestPart(hit: PartRayTraceResult, player: EntityPlayer) =
+    def harvestPart(hit: PartRayTraceResult, player: EntityPlayer): Unit =
         partList(hit.partIndex) match {
             case null =>
             case part => part.harvest(player, hit)
@@ -373,22 +373,22 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
         list
     }
 
-    def getPickBlock(hit: PartRayTraceResult) =
+    def getPickBlock(hit: PartRayTraceResult): ItemStack =
         partList(hit.partIndex) match {
             case null => null
             case part => part.pickItem(hit)
         }
 
-    def isSolid(side: Int) = partMap(side) match {
+    def isSolid(side: Int): Boolean = partMap(side) match {
         case face: TFacePart => face.solid(side)
         case _ => false
     }
 
-    def canPlaceTorchOnTop = partList.exists(_.canPlaceTorchOnTop) || isSolid(1)
+    def canPlaceTorchOnTop: Boolean = partList.exists(_.canPlaceTorchOnTop) || isSolid(1)
 
-    def getExplosionResistance(entity: Entity) = partList.view.map(_.getExplosionResistance(entity)).max
+    def getExplosionResistance(entity: Entity): Float = partList.view.map(_.getExplosionResistance(entity)).max
 
-    def getLightValue = partList.view.map(_.getLightValue).max
+    def getLightValue: Int = partList.view.map(_.getLightValue).max
 
     def getPlayerRelativeBlockHardness(player: EntityPlayer, hit: PartRayTraceResult): Float = {
         if (hit == null) return 1 / 100F
@@ -406,7 +406,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
         operate(_.onChunkLoad())
     }
 
-    override def setWorldCreate(worldIn: World) = setWorld(worldIn)
+    override def setWorldCreate(worldIn: World): Unit = setWorld(worldIn)
 
     def onMoved(): Unit = {
         operate(_.onMoved())
@@ -540,7 +540,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
         items.asScala.foreach(item => TileMultipart.dropItem(item, world, pos))
     }
 
-    override def shouldRefresh(world: World, pos: BlockPos, oldState: IBlockState, newState: IBlockState) = oldState.getBlock != newState.getBlock
+    override def shouldRefresh(world: World, pos: BlockPos, oldState: IBlockState, newState: IBlockState): Boolean = oldState.getBlock != newState.getBlock
 
     /** Capability handling */
 
@@ -574,7 +574,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
         }
     }
 
-    override final def hasCapability(capability: Capability[?], facing: EnumFacing) = {
+    override final def hasCapability(capability: Capability[?], facing: EnumFacing): Boolean = {
         calculateCap(capability)
         capMap.get(capability) match {
             case Some(holder) => (facing == null && holder.generic != null) || (facing != null && holder.sided.contains(facing))
@@ -646,7 +646,7 @@ object TileMultipart {
     /**
      * Gets a multipart tile instance at pos, converting if necessary.
      */
-    def getOrConvertTile(world: World, pos: BlockPos) = getOrConvertTile2(world, pos)._1
+    def getOrConvertTile(world: World, pos: BlockPos): TileMultipart = getOrConvertTile2(world, pos)._1
 
     /**
      * Gets a multipart tile instance at pos, converting if necessary.
@@ -657,8 +657,10 @@ object TileMultipart {
      */
     def getOrConvertTile2(world: World, pos: BlockPos): (TileMultipart, Boolean) = {
         val t = world.getTileEntity(pos)
-        if (t.isInstanceOf[TileMultipart]) {
-            return (t.asInstanceOf[TileMultipart], false)
+        t match {
+            case multipart: TileMultipart =>
+                return (multipart, false)
+            case _ =>
         }
 
         val p = MultiPartRegistry.convertBlock(world, pos, world.getBlockState(pos))
@@ -675,13 +677,13 @@ object TileMultipart {
     /**
      * Gets the multipart tile instance at pos, or null if it doesn't exist or is not a multipart tile
      */
-    def getTile(world: World, pos: BlockPos) =
+    def getTile(world: World, pos: BlockPos): TileMultipart =
         world.getTileEntity(pos) match {
             case t: TileMultipart => t
             case _ => null
         }
 
-    def checkNoEntityCollision(world: World, pos: BlockPos, part: TMultiPart) =
+    def checkNoEntityCollision(world: World, pos: BlockPos, part: TMultiPart): Boolean =
         part.getCollisionBoxes.asScala.forall(b => world.checkNoEntityCollision(b.aabb.offset(pos)))
 
     /**

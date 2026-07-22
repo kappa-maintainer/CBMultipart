@@ -15,7 +15,7 @@ import net.minecraft.util.BlockRenderLayer
 import net.minecraft.util.math.RayTraceResult
 import org.lwjgl.opengl.GL11._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object MicroblockRender {
     def renderHighlight(player: EntityPlayer, hit: RayTraceResult, mcrFactory: CommonMicroFactory, size: Int, material: Int): Unit = {

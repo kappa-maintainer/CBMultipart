@@ -3,9 +3,9 @@ plugins {
     id 'scala'
     id 'java-library'
     id 'maven-publish'
-    id 'com.gradleup.shadow' version '9.3.2'
+    id 'com.gradleup.shadow' version '9.5.1'
     id 'org.jetbrains.gradle.plugin.idea-ext' version '1.4.1'
-    id 'xyz.wagyourtail.unimined' version '1.4.12-kappa'
+    id 'xyz.wagyourtail.unimined' version '1.4.26-kappa'
     id 'net.kyori.blossom' version '2.2.0'
 }
 
@@ -35,12 +35,12 @@ base {
 }
 
 scala {
-    scalaVersion = '3.8.2'
+    scalaVersion = '3.8.4'
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
     if (propertyBool('generate_sources_jar')) {
         withSourcesJar()
@@ -72,7 +72,7 @@ unimined.minecraft {
         if (propertyBool('use_access_transformer')) {
             accessTransformer "${rootProject.projectDir}/src/main/resources/${propertyString('access_transformer_locations')}"
         }
-        loader "0.4.4-alpha"
+        loader "0.5.17-alpha"
         runs.auth.username = minecraft_username
         runs.all {
             def extraArgs = propertyString('extra_jvm_args')
@@ -171,11 +171,11 @@ if (!propertyBool('enable_shadow')) {
 }
 
 compileJava {
-    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_25
 }
 
 compileScala {
-    //scalaCompileOptions.additionalParameters = ['-rewrite', '-source', '3.6-migration']
+    scalaCompileOptions.additionalParameters = ['-release:25']
 }
 
 jar {
@@ -226,14 +226,18 @@ tasks.named(remapTaskName).configure {
     }
 }
 
+artifacts {
+    add('runtimeElements', tasks.named(remapTaskName))
+}
+
 compileTestJava {
-    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_25
 }
 
 test {
     useJUnitPlatform()
     javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     })
     if (propertyBool('show_testing_output')) {
         testLogging {

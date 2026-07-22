@@ -19,7 +19,7 @@ import org.objectweb.asm.Type._
 import org.objectweb.asm.tree._
 import org.objectweb.asm.{ClassReader, MethodVisitor, Type}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.{ListBuffer => MList, Map => MMap, Set => MSet}
 
 object DebugPrinter {
@@ -52,7 +52,7 @@ object DebugPrinter {
 
     def defined(name: String, bytes: Array[Byte]): Unit = {
         if ((permGenUsed + bytes.length) / 16000 != permGenUsed / 16000) {
-            logger.debug((permGenUsed + bytes.length) + " bytes of permGen has been used by ASMMixinCompiler")
+            logger.debug(s"${permGenUsed + bytes.length} bytes of permGen has been used by ASMMixinCompiler")
         }
 
         permGenUsed += bytes.length
@@ -211,7 +211,7 @@ object ASMMixinCompiler {
 
             def interfaces = clazz.getInterfaces.map(getClassInfo)
 
-            def methods = clazz.getMethods.map(ReflectionMethodInfo)
+            def methods = clazz.getMethods.map(this.ReflectionMethodInfo.apply)
         }
 
         class ClassNodeInfo(val cnode: ClassNode) extends ClassInfo {
@@ -236,7 +236,7 @@ object ASMMixinCompiler {
 
             def interfaces: Seq[ClassInfo] = cnode.interfaces.asScala.map(getClassInfo).toSeq
 
-            def methods = cnode.methods.asScala.map(MethodNodeInfoSource)
+            def methods = cnode.methods.asScala.map(this.MethodNodeInfoSource.apply)
         }
 
         class ScalaClassInfo(cnode$: ClassNode, val sig: ScalaSignature, val csym: ScalaSignature#ClassSymbolRef) extends ClassNodeInfo(cnode$) {

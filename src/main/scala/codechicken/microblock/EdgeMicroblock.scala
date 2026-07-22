@@ -48,7 +48,7 @@ object EdgePlacement extends PlacementProperties {
         }
 
         if (pmt.internal && !pmt.oppMod) {
-            return pmt.internalPlacement(pmt.htile part)
+            return pmt.internalPlacement(pmt.htile, part)
         }
 
         pmt.externalPlacement(part)

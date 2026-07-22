@@ -35,8 +35,6 @@ object TileCache {
                 t
             case None =>
                 throw new RuntimeException("DC: Client multipart @" + c + " not found")
-            case _ =>
-                null
         }
         case t => t
     }

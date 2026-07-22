@@ -35,15 +35,13 @@ trait TSlottedTile extends TileMultipart {
     }
 
     override def canAddPart(part: TMultiPart): Boolean = {
-        if (part.isInstanceOf[TSlottedPart]) {
+        val slotsAvailable = !part.isInstanceOf[TSlottedPart] || {
             val slotMask = part.asInstanceOf[TSlottedPart].getSlotMask
-            for (i <- 0 until v_partMap.length)
-                if ((slotMask & 1 << i) != 0 && partMap(i) != null) {
-                    return false
-                }
+            (0 until v_partMap.length).forall { i =>
+                (slotMask & 1 << i) == 0 || partMap(i) == null
+            }
         }
-
-        super.canAddPart(part)
+        slotsAvailable && super.canAddPart(part)
     }
 
     override def bindPart(part: TMultiPart): Unit = {

@@ -9,7 +9,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.text.TextComponentString
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.ArrayBuffer
 
 trait TIInventoryTile extends TileMultipart with ISidedInventory {
@@ -55,14 +55,7 @@ trait TIInventoryTile extends TileMultipart with ISidedInventory {
         }
     }
 
-    override def isEmpty = {
-        for ((inv, slot) <- slotMap) {
-            if (!inv.getStackInSlot(slot).isEmpty) {
-                false
-            }
-        }
-        true
-    }
+    override def isEmpty: Boolean = slotMap.forall { case (inv, slot) => inv.getStackInSlot(slot).isEmpty }
 
     override def getName = "Multipart Inventory"
 

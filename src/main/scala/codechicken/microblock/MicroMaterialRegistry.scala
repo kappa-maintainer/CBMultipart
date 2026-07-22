@@ -14,7 +14,7 @@ import net.minecraft.util.BlockRenderLayer
 import net.minecraft.util.math.RayTraceResult
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.{ListBuffer, HashMap => MHashMap}
 
 /**
