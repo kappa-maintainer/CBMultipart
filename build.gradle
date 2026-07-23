@@ -127,9 +127,6 @@ processResources {
 sourceSets {
     main {
         blossom {
-            scalaSources {
-                property('mod_version', propertyString('mod_version'))
-            }
             resources {
                 property('mod_version', propertyString('mod_version'))
             }

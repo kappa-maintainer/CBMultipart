@@ -6,7 +6,7 @@ import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.Mod.EventHandler
 import net.minecraftforge.fml.common.event._
 
-@Mod(modid = MultipartMod.modID, version = Reference.VERSION, dependencies = MultipartMod.deps, acceptedMinecraftVersions = CodeChickenLib.MC_VERSION_DEP, modLanguage = "scala")
+@Mod(modid = MultipartMod.modID, dependencies = MultipartMod.deps, acceptedMinecraftVersions = CodeChickenLib.MC_VERSION_DEP, modLanguage = "scala")
 object MultipartMod {
     final val modID = "forgemultipartcbe"
     final val deps = CodeChickenLib.MOD_VERSION_DEP + "required-after:forge@[14.23.5.2768,)"

@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.event.{FMLInitializationEvent, FMLPostIniti
 
 import scala.jdk.CollectionConverters._
 
-@Mod(modid = "microblockcbe", version = Reference.VERSION, acceptedMinecraftVersions = CodeChickenLib.MC_VERSION_DEP, dependencies = "required-after:forgemultipartcbe", modLanguage = "scala")
+@Mod(modid = "microblockcbe", acceptedMinecraftVersions = CodeChickenLib.MC_VERSION_DEP, dependencies = "required-after:forgemultipartcbe", modLanguage = "scala")
 object MicroblockMod {
     @EventHandler
     def preInit(event: FMLPreInitializationEvent): Unit = {
