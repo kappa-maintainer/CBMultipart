@@ -40,17 +40,17 @@ class ASMMixinFactory[T](val baseType: Class[T], private val paramTypes: Class[?
 
     protected def autoCompleteJavaTrait(cnode: ClassNode): Unit = {}
 
-    def construct(traitSet: JBitSet, args: Object*) = synchronized {
+    def construct(traitSet: JBitSet, args: Object*): T = synchronized {
         (classMap.get(traitSet) match {
             case Some(c) => c
             case None =>
                 val c = compile(traitSet)
                 classMap.put(traitSet.copy, c)
                 c
-        }).newInstance(args*)
+        }).newInstance(args *)
     }
 
-    def getId(s_trait: String) = traitMap(s_trait)
+    def getId(s_trait: String): Int = traitMap(s_trait)
 
     def registerTrait(traitClass: Class[?]): Int = registerTrait(traitClass.nodeName)
 
@@ -67,10 +67,12 @@ class ASMMixinFactory[T](val baseType: Class[T], private val paramTypes: Class[?
 
         val info = getClassInfo(cnode)
 
-        def concreteParent(info: ClassInfo): ClassInfo = info.superClass.map {
-            case i if i.isTrait => concreteParent(i)
-            case i => i
-        }.get
+        def concreteParent(info: ClassInfo): ClassInfo = info.superClass match {
+            case Some(i) if i.isTrait => concreteParent(i)
+            case Some(i) => i
+            case None =>
+                info.interfaces.iterator.map(concreteParent).find(_ != null).getOrElse(getClassInfo(baseType))
+        }
 
         val parentName = concreteParent(info).name
 

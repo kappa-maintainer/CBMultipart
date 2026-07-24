@@ -35,7 +35,7 @@ base {
 }
 
 scala {
-    scalaVersion = '3.8.4'
+    scalaVersion = propertyString('scala_version')
 }
 
 java {

@@ -23,6 +23,8 @@ repositories {
 }
 
 dependencies {
+    implementation "org.scala-lang:scala3-tasty-inspector_3:${propertyString('scala_version')}"
+
     compileOnly 'com.cleanroommc:sponge-mixin:0.20.12+mixin.0.8.7'
     if (propertyBool('enable_lwjglx')) {
         compileOnly 'com.cleanroommc:lwjglx:1.0.0'
@@ -30,7 +32,7 @@ dependencies {
 
     modRuntimeOnly 'com.cleanroommc:scalar:1.0.0'
 
-    modImplementation 'codechicken:CodeChickenLib:3.3.5'
+    modImplementation 'codechicken:CodeChickenLib:3.3.6:dev'
     modImplementation 'mezz:jei:4.32.0'
     modImplementation 'codechicken:ChickenASM:4.0.1'
     

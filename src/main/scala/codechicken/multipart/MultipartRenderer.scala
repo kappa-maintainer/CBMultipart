@@ -1,17 +1,16 @@
 package codechicken.multipart
 
-import java.util.{HashMap => JHashMap, Map => JMap}
-
+import java.util.{HashMap as JHashMap, Map as JMap}
 import codechicken.lib.reflect.{ObfMapping, ReflectionManager}
 import codechicken.lib.render.CCRenderState
 import codechicken.lib.render.block.{BlockRenderingRegistry, ICCBlockRenderer}
 import codechicken.lib.texture.TextureUtils
 import codechicken.lib.vec.Vector3
-import codechicken.multipart.BlockMultipart._
+import codechicken.multipart.BlockMultipart.*
 import codechicken.multipart.scalatraits.TTESRRenderTile
 import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.block.model._
+import net.minecraft.client.renderer.block.model.*
 import net.minecraft.client.renderer.block.statemap.DefaultStateMapper
 import net.minecraft.client.renderer.texture.{TextureAtlasSprite, TextureMap}
 import net.minecraft.client.renderer.tileentity.{TileEntityRendererDispatcher, TileEntitySpecialRenderer}
@@ -23,19 +22,20 @@ import net.minecraftforge.client.MinecraftForgeClient
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import org.lwjgl.opengl.GL11
 
-import scala.jdk.CollectionConverters._
+import scala.compiletime.uninitialized
+import scala.jdk.CollectionConverters.*
 
 /**
  * Internal class for rendering callbacks. Should be moved to the handler package
  */
 @SideOnly(Side.CLIENT)
 object MultipartRenderer extends TileEntitySpecialRenderer[TTESRRenderTile] with ICCBlockRenderer {
-    val renderType = BlockRenderingRegistry.createRenderType("fmpcbe_mpblock")
-    var batchBuffer: Tessellator = null
+    val renderType: net.minecraft.util.EnumBlockRenderType = BlockRenderingRegistry.createRenderType("fmpcbe_mpblock")
+    var batchBuffer: Tessellator = uninitialized
 
     def init(): Unit = {
         BlockRenderingRegistry.registerRenderer(renderType, this)
-        val mapping = new ObfMapping("net/minecraft/client/renderer/tileentity/TileEntityRendererDispatcher", "batchBuffer", "net/minecraft/client/renderer/Tessellator")
+        val mapping = new ObfMapping("net/minecraft/client/renderer/tileentity/TileEntityRendererDispatcher", "batchBuffer", "Lnet/minecraft/client/renderer/Tessellator;")
         batchBuffer = ReflectionManager.getField(mapping, TileEntityRendererDispatcher.instance, classOf[Tessellator])
     }
 
@@ -92,7 +92,7 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TTESRRenderTile] with
         buffer.setTranslation(0, 0, 0)
     }
 
-    override def renderBlock(world: IBlockAccess, pos: BlockPos, state: IBlockState, buffer: BufferBuilder) =
+    override def renderBlock(world: IBlockAccess, pos: BlockPos, state: IBlockState, buffer: BufferBuilder): Boolean =
         getClientTile(world, pos) match {
             case null => false
             case tile =>
