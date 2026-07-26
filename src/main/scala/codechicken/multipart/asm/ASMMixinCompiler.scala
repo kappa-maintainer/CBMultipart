@@ -10,6 +10,7 @@ import codechicken.lib.util.ResourceUtils
 import codechicken.multipart.asm.ASMImplicits.*
 import codechicken.multipart.asm.DebugPrinter.logger
 import codechicken.multipart.handler.MultipartProxy
+import net.minecraft.launchwrapper.Launch
 import net.minecraft.launchwrapper.LaunchClassLoader
 import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler
@@ -63,13 +64,7 @@ object DebugPrinter {
 }
 
 object ASMMixinCompiler {
-    val cl: LaunchClassLoader = getClass.getClassLoader.asInstanceOf[LaunchClassLoader]
-    val m_defineClass = classOf[ClassLoader].getDeclaredMethod("defineClass", classOf[Array[Byte]], Integer.TYPE, Integer.TYPE)
-    val m_runTransformers = classOf[LaunchClassLoader].getDeclaredMethod("runTransformers", classOf[String], classOf[String], classOf[Array[Byte]])
-    val f_transformerExceptions = classOf[LaunchClassLoader].getDeclaredField("transformerExceptions")
-    m_defineClass.setAccessible(true)
-    m_runTransformers.setAccessible(true)
-    f_transformerExceptions.setAccessible(true)
+    val cl: LaunchClassLoader = Launch.classLoader
 
     private val traitByteMap = mutable.Map[String, Array[Byte]]()
     private val mixinMap = mutable.Map[String, MixinInfo]()
@@ -79,7 +74,7 @@ object ASMMixinCompiler {
         DebugPrinter.defined(name, bytes)
 
         try {
-            m_defineClass.invoke(cl, bytes, 0: Integer, bytes.length: Integer).asInstanceOf[Class[?]]
+            Launch.classLoader.defineClass(name.replace('/', '.'), bytes)
         } catch {
             case link: LinkageError if link.getMessage.contains("duplicate") =>
                 throw new IllegalStateException("class with name: " + name + " already loaded. Do not reference your java mixin classes before registering", link)
@@ -94,13 +89,11 @@ object ASMMixinCompiler {
             return null
         }
 
-        def useTransformers = f_transformerExceptions.get(cl).asInstanceOf[JSet[String]]
-          .asScala.exists(jName.startsWith)
-
+        def useTransformers = Launch.classLoader.getInvalidClasses.asScala.exists(jName.startsWith)
         val obfName = if (ObfMapping.obfuscated) FMLDeobfuscatingRemapper.INSTANCE.unmap(name).replace('/', '.') else jName
         val bytes = cl.getClassBytes(obfName)
         if (bytes != null && useTransformers) {
-            return m_runTransformers.invoke(cl, jName, obfName, bytes).asInstanceOf[Array[Byte]]
+            return Launch.classLoader.runTransformers(obfName, jName, bytes)
         }
 
         bytes
@@ -131,8 +124,10 @@ object ASMMixinCompiler {
         }
     }
 
+    case class SuperBridge(name: String, targetName: String, desc: String)
+
     case class MixinInfo(name: String, parent: String, parentTraits: Seq[MixinInfo],
-                         fields: Seq[FieldMixin], methods: Seq[MethodNode], supers: Seq[String],
+                         fields: Seq[FieldMixin], methods: Seq[MethodNode], supers: Seq[SuperBridge],
                          implementationOwner: String = null, implementationSuffix: String = "",
                          hasInitializer: Boolean = true, implementationIsInterface: Boolean = false) {
         def linearise: Seq[MixinInfo] = parentTraits.flatMap(_.linearise) :+ this
@@ -352,14 +347,16 @@ object ASMMixinCompiler {
                 mv.visitMaxs(width(ftype) + 1, width(ftype) + 1)
             }
 
-            t.supers.foreach { s =>
-                val (name, desc) = seperateDesc(s)
-                val mv = cnode.visitMethod(ACC_PUBLIC, t.name.replace('/', '$') + "$$super$" + name, desc, null, null).asInstanceOf[MethodNode]
+            t.supers.foreach { bridge =>
+                val mv = cnode.visitMethod(ACC_PUBLIC, bridge.name, bridge.desc, null, null).asInstanceOf[MethodNode]
 
-                prevInfos.findLast(_.methods.exists(m => m.name == name && m.desc == desc)) match {
-                    //each super goes to the one before
-                    case Some(st) => writeStaticBridge(mv, name, st)
-                    case None => writeBridge(mv, desc, INVOKESPECIAL, baseInfo.findPublicImpl(name, desc).get.owner.name, name, desc, false)
+                prevInfos.findLast(_.methods.exists(m => m.name == bridge.targetName && m.desc == bridge.desc)) match {
+                    // Each super call goes to the previous trait implementation.
+                    case Some(st) => writeStaticBridge(mv, bridge.targetName, st)
+                    case None =>
+                        writeBridge(mv, bridge.desc, INVOKESPECIAL,
+                            baseInfo.findPublicImpl(bridge.targetName, bridge.desc).get.owner.name,
+                            bridge.targetName, bridge.desc, false)
                 }
             }
 
@@ -457,7 +454,12 @@ object ASMMixinCompiler {
 
         //val parentTraits = getAndRegisterParentTraits(cnode)
         val fields = cnode.fields.asScala.map(f => (f.name, FieldMixin(f.name, f.desc, f.access))).toMap
-        val supers = MList[String]() //nameDesc to super owner
+        val supers = MList[SuperBridge]()
+
+        def superBridge(name: String, desc: String): SuperBridge = {
+            val targetName = name.substring(name.lastIndexOf("$$super$") + "$$super$".length)
+            SuperBridge(name, targetName, desc)
+        }
         val methods = MList[MethodNode]()
         val methodSigs = cnode.methods.asScala.map(m => m.name + m.desc).toSet
 
@@ -485,12 +487,13 @@ object ASMMixinCompiler {
         }
 
         def superInsn(minsn: MethodInsnNode) = {
-            val bridgeName = cnode.name.replace('/', '$') + "$$super$" + minsn.name
-            if (!supers.contains(minsn.name + minsn.desc)) {
-                tnode.visitMethod(ACC_PUBLIC | ACC_ABSTRACT, bridgeName, minsn.desc, null, null)
-                supers += minsn.name + minsn.desc
+            val generated = SuperBridge(cnode.name.replace('/', '$') + "$$super$" + minsn.name, minsn.name, minsn.desc)
+            val bridge = supers.find(b => b.targetName == generated.targetName && b.desc == generated.desc).getOrElse {
+                tnode.visitMethod(ACC_PUBLIC | ACC_ABSTRACT, generated.name, generated.desc, null, null)
+                supers += generated
+                generated
             }
-            new MethodInsnNode(INVOKEINTERFACE, cnode.name, bridgeName, minsn.desc, true)
+            new MethodInsnNode(INVOKEINTERFACE, cnode.name, bridge.name, bridge.desc, true)
         }
 
         def staticClone(mnode: MethodNode, name: String, access: Int) = {
@@ -505,6 +508,10 @@ object ASMMixinCompiler {
             val stack = new StackAnalyser(getObjectType(cnode.name), base)
             val insnList = mnode.instructions
             var insn = insnList.getFirst
+            // Scala 3 emits trait-super bridges on concrete helper classes. Once the
+            // method is moved to the synthetic $class, its original invokespecial is
+            // no longer valid because that helper does not inherit from the target.
+            val isScalaSuperBridge = base.name.contains("$$super$")
 
             def replace(newinsn: AbstractInsnNode): Unit = {
                 insnList.insert(insn, newinsn)
@@ -524,7 +531,7 @@ object ASMMixinCompiler {
                     }
                     case minsn: MethodInsnNode => insn.getOpcode match {
                         case INVOKESPECIAL =>
-                            if (getSuper(minsn, stack).isDefined) {
+                            if (isScalaSuperBridge || getSuper(minsn, stack).isDefined) {
                                 replace(superInsn(minsn))
                             }
                         case INVOKEVIRTUAL =>
@@ -590,7 +597,14 @@ object ASMMixinCompiler {
             staticTransform(mv, mnode)
         }
 
-        cnode.methods.asScala.foreach(convertMethod)
+        cnode.methods.asScala.filter(_.name.contains("$$super$")).foreach { method =>
+            val bridge = superBridge(method.name, method.desc)
+            if (!supers.exists(_.name == bridge.name)) {
+                tnode.visitMethod(ACC_PUBLIC | ACC_ABSTRACT, bridge.name, bridge.desc, null, null)
+                supers += bridge
+            }
+        }
+        cnode.methods.asScala.filterNot(_.name.contains("$$super$")).foreach(convertMethod)
 
         define(inode.name, createBytes(inode, 0))
         define(tnode.name, createBytes(tnode, 0))
@@ -646,7 +660,7 @@ object ASMMixinCompiler {
         }.toSeq
         val supers = abstractMethods.filter(_.name.contains("$$super$")).map { method =>
             val marker = "$$super$"
-            method.name.substring(method.name.indexOf(marker) + marker.length) + method.desc
+            SuperBridge(method.name, method.name.substring(method.name.indexOf(marker) + marker.length), method.desc)
         }.toSeq
         val methods = cnode.methods.asScala.filter { method =>
             (method.access & (ACC_ABSTRACT | ACC_STATIC | ACC_PRIVATE)) == 0 &&
