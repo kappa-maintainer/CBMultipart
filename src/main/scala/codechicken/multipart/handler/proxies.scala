@@ -10,9 +10,11 @@ import codechicken.multipart._
 import codechicken.multipart.capability.ItemCapMerger
 import codechicken.multipart.scalatraits.TTESRRenderTile
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
+import net.minecraft.entity.Entity
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.{BlockPos, ChunkPos}
+import net.minecraft.world.World
 import net.minecraftforge.client.event.ModelBakeEvent
 import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.common.MinecraftForge
@@ -68,6 +70,8 @@ class MultipartProxy_serverImpl {
     def onTileClassBuilt(t: Class[? <: TileEntity]): Unit = {
         MultipartSaveLoad.registerTileClass(t)
     }
+
+    def handleRunningEffects(world: World, pos: BlockPos, entity: Entity): Unit = {}
 }
 
 class MultipartProxy_clientImpl extends MultipartProxy_serverImpl {
@@ -104,6 +108,11 @@ class MultipartProxy_clientImpl extends MultipartProxy_serverImpl {
         if(classOf[TTESRRenderTile].isAssignableFrom(t)) {
             ClientRegistry.bindTileEntitySpecialRenderer(t.asInstanceOf[Class[TileEntity]], MultipartRenderer.asInstanceOf[TileEntitySpecialRenderer[TileEntity]])
         }
+    }
+
+    @SideOnly(Side.CLIENT)
+    override def handleRunningEffects(world: World, pos: BlockPos, entity: Entity): Unit = {
+        MultipartParticleEffectsClient.handleRunningEffects(world, pos, entity)
     }
 
     @SubscribeEvent

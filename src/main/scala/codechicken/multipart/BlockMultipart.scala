@@ -13,13 +13,13 @@ import net.minecraft.block.properties.PropertyBool
 import net.minecraft.block.state.{BlockFaceShape, BlockStateContainer, IBlockState}
 import net.minecraft.client.Minecraft
 import net.minecraft.client.particle.ParticleManager
-import net.minecraft.entity.Entity
+import net.minecraft.entity.{Entity, EntityLivingBase}
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.math.{AxisAlignedBB, BlockPos, RayTraceResult, Vec3d}
 import net.minecraft.util.{BlockRenderLayer, EnumFacing, EnumHand}
-import net.minecraft.world.{Explosion, IBlockAccess, World}
+import net.minecraft.world.{Explosion, IBlockAccess, World, WorldServer}
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
 import scala.jdk.CollectionConverters._
@@ -277,8 +277,20 @@ class BlockMultipart extends Block(Material.ROCK) {
         }
     }
 
+    override def addLandingEffects(state: IBlockState, world: WorldServer, pos: BlockPos, actualState: IBlockState, entity: EntityLivingBase, numberOfParticles: Int): Boolean =
+        MultipartParticleEffects.dispatchLandingEffects(world, pos, entity, numberOfParticles)
+
+    override def addRunningEffects(state: IBlockState, world: World, pos: BlockPos, entity: Entity): Boolean = {
+        if (world.isRemote) {
+            MultipartProxy.handleRunningEffects(world, pos, entity)
+        }
+        // The shared BlockMultipart state cannot identify a part, so never let
+        // vanilla create a BLOCK_CRACK particle from its static model.
+        true
+    }
+
     @SideOnly(Side.CLIENT)
-    override def addHitEffects(state: IBlockState, world: World, hit: RayTraceResult, manager: ParticleManager) = {
+    override def addHitEffects(state: IBlockState, world: World, hit: RayTraceResult, manager: ParticleManager): Boolean = {
         (getClientTile(world, hit.getBlockPos), hit) match {
             case (tile: TileMultipartClient, pHit: PartRayTraceResult) => tile.addHitEffects(pHit, manager)
             case _ =>

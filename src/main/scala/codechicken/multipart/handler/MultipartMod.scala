@@ -1,7 +1,7 @@
 package codechicken.multipart.handler
 
 import codechicken.lib.CodeChickenLib
-import codechicken.multipart.{MultiPartRegistry, Reference, TickScheduler, WrappedTileEntityRegistry}
+import codechicken.multipart.{MultiPartRegistry, TickScheduler, WrappedTileEntityRegistry}
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.Mod.EventHandler
 import net.minecraftforge.fml.common.event._

@@ -2,7 +2,6 @@ package codechicken.microblock.handler
 
 import codechicken.lib.CodeChickenLib
 import codechicken.microblock.{ConfigContent, DefaultContent, MicroMaterialRegistry}
-import codechicken.multipart.Reference
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.Mod.EventHandler
 import net.minecraftforge.fml.common.event.FMLInterModComms.IMCEvent

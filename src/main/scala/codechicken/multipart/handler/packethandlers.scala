@@ -3,6 +3,8 @@ package codechicken.multipart.handler
 import java.io.{ByteArrayOutputStream, DataOutputStream}
 import java.util.{Iterator => JIterator, LinkedList => JLinkedList, Map => JMap}
 
+import codechicken.lib.vec.Vector3
+
 import codechicken.lib.data.MCDataOutputWrapper
 import codechicken.lib.packet.ICustomPacketHandler.{IClientPacketHandler, IServerPacketHandler}
 import codechicken.lib.packet.{IHandshakeHandler, PacketCustom}
@@ -15,9 +17,11 @@ import net.minecraft.network.play.server.SPacketDisconnect
 import net.minecraft.network.play.{INetHandlerPlayClient, INetHandlerPlayServer}
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumHand
+import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.{BlockPos, ChunkPos}
 import net.minecraft.util.text.{TextComponentString, TextComponentTranslation}
 import net.minecraft.world.World
+import net.minecraft.entity.EntityLivingBase
 import net.minecraft.world.chunk.Chunk
 
 import scala.jdk.CollectionConverters._
@@ -35,6 +39,7 @@ object MultipartCPH extends MultipartPH with IClientPacketHandler {
                 case 1 => handlePartRegistration(packet, netHandler)
                 case 2 => handleCompressedTileDesc(packet, mc.world)
                 case 3 => handleCompressedTileData(packet, mc.world)
+                case 4 => MultipartParticleEffectsClient.handleLandingEffects(packet, mc.world)
             }
         }
         catch {
@@ -80,6 +85,10 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
     }
 
     private val updateMap = MMap[World, MMap[BlockPos, MCByteStream]]()
+    private val landingEffects = MMap[World, collection.mutable.ArrayBuffer[LandingEffect]]()
+
+    private case class LandingEffect(pos: BlockPos, partIndex: Int, partType: ResourceLocation, entityPos: Vector3, count: Int)
+
     /**
      * These maps are keyed by entityID so that new player instances with the same entity id don't conflict world references
      */
@@ -102,7 +111,18 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
     def onWorldUnload(world: World): Unit = {
         if (!world.isRemote) {
             updateMap.remove(world)
+            landingEffects.remove(world)
         }
+    }
+
+    /**
+     * Queued so tile add/remove packets are sent before the particle packet.
+     * The client additionally validates partIndex against partType before it
+     * renders, avoiding a stale list index being used for a different part.
+     */
+    def queueLandingEffects(world: World, pos: BlockPos, partIndex: Int, partType: ResourceLocation, entity: EntityLivingBase, count: Int): Unit = {
+        landingEffects.getOrElseUpdate(world, collection.mutable.ArrayBuffer()) +=
+            LandingEffect(pos, partIndex, partType, Vector3.fromEntity(entity), count)
     }
 
     def getTileStream(world: World, pos: BlockPos) =
@@ -140,6 +160,22 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
             }
         }
         updateMap.foreach(_._2.clear())
+
+        // This follows type-3 tile updates in the same server tick, so a client
+        // normally applies structural multipart changes before rendering dust.
+        landingEffects.foreach { case (world, effects) =>
+            effects.foreach { effect =>
+                new PacketCustom(channel, 4)
+                    .writePos(effect.pos)
+                    .writeByte(effect.partIndex)
+                    .writeResourceLocation(effect.partType)
+                    .writeVector(effect.entityPos)
+                    .writeInt(effect.count)
+                    .sendToChunk(world, effect.pos.getX >> 4, effect.pos.getZ >> 4)
+            }
+            effects.clear()
+        }
+
         for (p <- players if newWatchers.asJava.containsKey(p.getEntityId)) {
             for (c <- newWatchers(p.getEntityId).asScala) {
                 val chunk = p.world.getChunk(c.x, c.z)
